@@ -6,7 +6,8 @@ from neighbors_struct import nullspace_modp
 from sympy import Matrix
 from f4_nbrs_head import hnf_rows
 import cypari2; pari = cypari2.Pari(); pari.allocatemem(600*10**6)
-p = 5; E = np.eye(27, dtype=np.int64)
+import os
+p = int(os.environ.get('F4P', '5')); E = np.eye(27, dtype=np.int64)
 def cross(a, b): return sharp(a + b) - sharp(a) - sharp(b)
 def cross_matrix(v): Sv = sharp(v); return np.array([sharp(E[i] + v) - sharp(E[i]) - Sv for i in range(27)]) % p
 def rref_p(rows):
@@ -101,13 +102,16 @@ def neighbour_from_S(S, rng, tries=1):
         Lam = hnf_rows(gens)
         out.append(Lam)
     return out, (len(ns) if ns else 0)
-def is_albert(Lam, s=p):
+def is_albert(Lam, s=None):
+    s = p if s is None else s
     """Lam is a basis of s*J'; J' is an Albert lattice iff det = s^54, I ∈ J', sharp(J') ⊂ J'."""
     if Matrix((Lam @ GRAM @ Lam.T).tolist()).det() != s**54: return False
     Ainv = Matrix(Lam.T.tolist()); Sh = sharp(Lam)
     if not all(q.q == 1 for q in Ainv.solve(Matrix((I27*s).tolist()))): return False
     return all(all(x.q == 1 for x in Ainv.solve(Matrix(Sh[i].tolist())/s)) for i in range(27))
-def typ(Lam, s=p): return int(pari.qfminim(pari.matrix(27, 27, (Lam @ GRAM @ Lam.T).flatten().tolist()), s*s, 0, 2)[0]) // 2
+def typ(Lam, s=None):
+    s = p if s is None else s
+    return int(pari.qfminim(pari.matrix(27, 27, (Lam @ GRAM @ Lam.T).flatten().tolist()), s*s, 0, 2)[0]) // 2
 if __name__ == "__main__" and not (len(sys.argv) > 3 and sys.argv[3] in ("five", "sample")):
     rng = np.random.default_rng(int(sys.argv[1]) if len(sys.argv) > 1 else 0); t0 = time.time()
     for trial in range(int(sys.argv[2]) if len(sys.argv) > 2 else 3):

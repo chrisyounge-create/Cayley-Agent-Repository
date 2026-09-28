@@ -29,7 +29,9 @@ jobs:
       - run: pip install numpy sympy cypari2 python-flint
       - name: main even orbit, certified
         working-directory: ls
-        run: timeout 20000 python3 main_orbit2.py ${{ matrix.N }} | grep '^{' > orbit_${{ matrix.N }}.json || echo '{"N": ${{ matrix.N }}, "status": "timeout or failure"}' > orbit_${{ matrix.N }}.json; cat orbit_${{ matrix.N }}.json
+        run: |
+          if timeout 20000 python3 main_orbit2.py ${{ matrix.N }} | grep '^{' > orbit_${{ matrix.N }}.json; then true; else echo "{\"N\": ${{ matrix.N }}, \"status\": \"timeout or failure\"}" > orbit_${{ matrix.N }}.json; fi
+          cat orbit_${{ matrix.N }}.json
       - uses: actions/upload-artifact@v4
         with:
           name: orbit-${{ matrix.N }}

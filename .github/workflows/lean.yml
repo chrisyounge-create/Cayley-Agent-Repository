@@ -12,7 +12,7 @@ jobs:
         uses: leanprover/lean-action@v1
         with:
           lake-package-directory: lean
-          build-args: "Eisenstein LogMarkov"
+          build-args: "Eisenstein LogMarkov EisensteinComponent"
           use-github-cache: false
       - name: Axioms used
         working-directory: lean
@@ -20,11 +20,13 @@ jobs:
           cat > Axioms.lean <<'EOT'
           import Eisenstein
           import LogMarkov
+          import EisensteinComponent
           #print axioms Eisenstein.mass_criterion
+          #print axioms Eisenstein.cuspidal_stable
+          #print axioms Eisenstein.eisenstein_component_to_mass
           #print axioms log_markov
+          #print axioms Eisenstein.eisenstein_idempotent_step
+          #print axioms Eisenstein.deligne_serre_prime
+          #print axioms Eisenstein.deligne_serre_lift
           EOT
-          lake env lean Axioms.lean || true
-      - name: Build EisensteinComponent skeleton (sorry expected; must at least typecheck)
-        working-directory: lean
-        continue-on-error: true
-        run: lake build EisensteinComponent
+          lake env lean Axioms.lean

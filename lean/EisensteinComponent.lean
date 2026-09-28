@@ -38,7 +38,7 @@ lemma exists_unique_idempotent_map_one {ι : Type*} [Fintype ι] [DecidableEq ι
   have h1 : ∑ i, χ (e i) = 1 := by rw [← map_sum, hsum, map_one]
   have hex : ∃ j, χ (e j) ≠ 0 := by
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     have : ∑ i, χ (e i) = 0 := Finset.sum_eq_zero (fun i _ => hcon i)
     rw [h1] at this; exact one_ne_zero this
   obtain ⟨j, hj⟩ := hex

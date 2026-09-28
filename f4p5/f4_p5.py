@@ -108,7 +108,7 @@ def is_albert(Lam, s=p):
     if not all(q.q == 1 for q in Ainv.solve(Matrix((I27*s).tolist()))): return False
     return all(all(x.q == 1 for x in Ainv.solve(Matrix(Sh[i].tolist())/s)) for i in range(27))
 def typ(Lam, s=p): return int(pari.qfminim(pari.matrix(27, 27, (Lam @ GRAM @ Lam.T).flatten().tolist()), s*s, 0, 2)[0]) // 2
-if __name__ == "__main__" and not (len(sys.argv) > 3 and sys.argv[3] == "five"):
+if __name__ == "__main__" and not (len(sys.argv) > 3 and sys.argv[3] in ("five", "sample")):
     rng = np.random.default_rng(int(sys.argv[1]) if len(sys.argv) > 1 else 0); t0 = time.time()
     for trial in range(int(sys.argv[2]) if len(sys.argv) > 2 else 3):
         v = random_rank_one(rng); S, f0, f1 = p1_point_through(v, rng)

@@ -71,4 +71,7 @@ theorem log_markov {ι : Type*} (s : Finset ι) (x : ι → ℝ) (hx : ∀ i ∈
     rw [one_div, Real.log_inv]
   rw [hlogε]
   rw [hsplit] at hlog
-  nlinarith [hSle, hTle, hlog]
+  have h1 : (β + 1 / Real.exp 1) * n = β * n + n / Real.exp 1 := by ring
+  have h2 : ((S.card : ℝ)) * -Real.log ε = -((S.card : ℝ) * Real.log ε) := by ring
+  rw [h1, h2]
+  linarith [hSle, hTle, hlog]

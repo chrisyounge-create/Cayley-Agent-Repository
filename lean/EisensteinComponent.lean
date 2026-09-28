@@ -85,21 +85,33 @@ variable {A : Type*} [CommRing A] [Algebra O A]
 every prime ideal `𝔫` of `A` contains a prime `P` with `P ∩ O = 0`.  Consequently `A ⧸ P` is a
 domain into which `O` embeds, and the quotient map `A → A ⧸ P` is a system of eigenvalues
 (a ring homomorphism to a domain) whose reduction modulo `𝔫 ⧸ P` is the given one. -/
-theorem deligne_serre_prime [NoZeroSMulDivisors O A] [IsNoetherianRing A]
+theorem deligne_serre_prime [NoZeroSMulDivisors O A]
     (𝔫 : Ideal A) [𝔫.IsPrime] :
     ∃ P : Ideal A, P.IsPrime ∧ P ≤ 𝔫 ∧ P.comap (algebraMap O A) = ⊥ := by
-  -- a minimal prime below 𝔫 consists of zero-divisors; torsion-freeness then forces P ∩ O = 0
+  -- a minimal prime `P` below `𝔫` consists of zero-divisors; torsion-freeness forces `P ∩ O = 0`
   obtain ⟨P, hPmin, hP𝔫⟩ := Ideal.exists_minimalPrimes_le (I := (⊥ : Ideal A)) (J := 𝔫) bot_le
-  have hPprime : P.IsPrime := hPmin.1.1
-  refine ⟨P, hPprime, hP𝔫, ?_⟩
+  refine ⟨P, hPmin.1.1, hP𝔫, ?_⟩
   refine le_antisymm ?_ bot_le
   intro o ho
   rw [Ideal.mem_comap] at ho
-  -- elements of a minimal prime over ⊥ are zero-divisors
-  have hzd : algebraMap O A o ∈ nonZeroDivisors A → False := by
-    intro hnzd
-    exact (Ideal.mem_minimalPrimes_bot_iff_isNilpotent_or.mp ?_) -- placeholder, replaced below
-  sorry
+  obtain ⟨y, hy, hxy⟩ := Ideal.exists_mul_mem_of_mem_minimalPrimes hPmin ho
+  have hy0 : y ≠ 0 := fun h => hy (by rw [h]; exact Ideal.zero_mem _)
+  have hoy : o • y = 0 := by rw [Algebra.smul_def]; exact Ideal.mem_bot.mp hxy
+  rcases smul_eq_zero.mp hoy with h | h
+  · exact Ideal.mem_bot.mpr h
+  · exact absurd h hy0
+
+/-- The lifted system of eigenvalues: `A → A ⧸ P` is a ring homomorphism to a domain, restricting
+to an injection on `O` (so `Frac(A ⧸ P)` is a field extension of `Frac(O)`, finite when `A` is a
+finite `O`-algebra), and `P ≤ 𝔫` says it reduces modulo `𝔫 ⧸ P` to the given system. -/
+theorem deligne_serre_lift [NoZeroSMulDivisors O A]
+    (𝔫 : Ideal A) [𝔫.IsPrime] :
+    ∃ P : Ideal A, P.IsPrime ∧ P ≤ 𝔫 ∧
+      Function.Injective ((Ideal.Quotient.mk P).comp (algebraMap O A)) := by
+  obtain ⟨P, hP, hP𝔫, hcomap⟩ := deligne_serre_prime (O := O) 𝔫
+  refine ⟨P, hP, hP𝔫, ?_⟩
+  rw [RingHom.injective_iff_ker_eq_bot, ← RingHom.comap_ker, Ideal.mk_ker]
+  exact hcomap
 
 end DeligneSerre
 

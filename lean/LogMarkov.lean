@@ -52,7 +52,7 @@ theorem log_markov {ι : Type*} (s : Finset ι) (x : ι → ℝ) (hx : ∀ i ∈
         rw [Real.log_mul hxi.ne' hq.ne'] at this
         linarith
       have hsumT : ∑ i ∈ T, x i ≤ n := by
-        rw [hn, ← hsum]
+        rw [← hsum]
         exact Finset.sum_le_sum_of_subset_of_nonneg hTsub (fun i hi _ => le_of_lt (hx i hi))
       calc ∑ i ∈ T, Real.log (x i) ≤ ∑ i ∈ T, (x i * (t / n) - 1 - Real.log (t / n)) := Finset.sum_le_sum hpt
         _ = (∑ i ∈ T, x i) * (t / n) - t - t * Real.log (t / n) := by
@@ -70,5 +70,5 @@ theorem log_markov {ι : Type*} (s : Finset ι) (x : ι → ℝ) (hx : ∀ i ∈
   have hlogε : Real.log (1 / ε) = - Real.log ε := by
     rw [one_div, Real.log_inv]
   rw [hlogε]
-  have := hsplit ▸ hlog
-  nlinarith [hSle, hTle, this]
+  rw [hsplit] at hlog
+  nlinarith [hSle, hTle, hlog]

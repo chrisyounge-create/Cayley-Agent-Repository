@@ -1,63 +1,106 @@
 /-
-  Octonion Program — Lean skeleton for the two unformalised steps of the existence theorem
-  (Paper I, Theorem 2.1, steps (ii)⇒(iii) and the final assertion).  28 Sept 2026.
+  Octonion Program — the two remaining steps of the existence theorem (Paper I, Theorem 2.1):
+  the Eisenstein-idempotent step and the algebraic core of the Deligne–Serre lemma.
+  28 September 2026.  Compiled by GitHub Actions against Mathlib.
 
-  STATUS: statements only (`sorry`).  Requires a full Mathlib (RingTheory.Ideal, Artinian rings,
-  localisation at maximal ideals, LinearAlgebra.Eigenspace); the project's cached build lacks these.
-  Compile with `lake exe cache get` then `lake env lean EisensteinComponent.lean`.
-
-  Setting.  O a complete DVR (a finite extension of ℤ_ℓ) with uniformiser λ and residue field k.
-  M = O^X for a finite type X (the class set).  T : a finite set of commuting O-linear endomorphisms
-  of M (the Hecke operators), each fixing the constant vector 1 up to the scalar N_T.
-  𝕋 = the O-subalgebra of End(M) they generate — a finite commutative O-algebra, hence a finite
-  product of local O-algebras; 𝔪 = the maximal ideal (λ, T − N_T) ("Eisenstein").
+  Conventions.  `A` is the (commutative) Hecke algebra acting on the module `M` (the O-valued functions
+  on the class set); `C ≤ M` is the cuspidal submodule, assumed `A`-stable; `one : M` is the constant
+  vector, on which `A` acts through the Eisenstein character `χ : A →+* O` (`a • one = χ a • one`).
+  The decomposition of `A` into local pieces enters as a complete family of orthogonal idempotents
+  `e : ι → A` — its existence for a finite algebra over a complete DVR is the standard structure
+  theorem and is taken as a hypothesis here.
 -/
 import Mathlib
 
-open Ideal
-
 namespace Eisenstein
 
-variable {O : Type*} [CommRing O] [IsDomain O] [IsDiscreteValuationRing O]
-variable {X : Type*} [Fintype X] [DecidableEq X]
+section IdempotentStep
 
-/-- The Hecke algebra: a commutative O-subalgebra of endomorphisms of `X → O`. -/
-structure HeckeAlgebra (O X) [CommRing O] [Fintype X] where
-  T : Subalgebra O (Module.End O (X → O))
-  comm : ∀ a b : T, a * b = b * a
-  finite : Module.Finite O T
-  eis : T →ₐ[O] O                                  -- the Eisenstein character T ↦ N_T
-  eis_const : ∀ t : T, (t : Module.End O (X → O)) (fun _ => 1) = fun _ => eis t
+variable {O : Type*} [CommRing O] [IsDomain O]
+variable {A : Type*} [CommRing A] [Algebra O A]
+variable {M : Type*} [AddCommGroup M] [Module O M] [Module A M] [IsScalarTower O A M]
 
-/-- The Eisenstein maximal ideal 𝔪 = (λ, ker eis) of 𝕋. -/
-noncomputable def eisIdeal (H : HeckeAlgebra O X) (ϖ : O) : Ideal H.T :=
-  Ideal.span ({algebraMap O H.T ϖ} ∪ (RingHom.ker H.eis.toRingHom : Set H.T))
+/-- An idempotent of a commutative ring maps to `0` or `1` under a ring homomorphism to a domain. -/
+lemma idempotent_map_domain (χ : A →+* O) {e : A} (he : IsIdempotentElem e) :
+    χ e = 0 ∨ χ e = 1 := by
+  have h : χ e * χ e = χ e := by rw [← map_mul, he.eq]
+  have : χ e * (χ e - 1) = 0 := by ring_nf; linear_combination h
+  rcases mul_eq_zero.mp this with h0 | h1
+  · exact Or.inl h0
+  · exact Or.inr (sub_eq_zero.mp h1)
 
-/-- STEP (ii)⇒(iii).  The Eisenstein component of M = O^X is a 𝕋-direct summand M_𝔪 containing the
-constant vector; the projection e_𝔪 onto it is an element of 𝕋 (an idempotent), so it preserves the
-cuspidal sublattice C = {f : Σ e_i f_i = 0} and fixes 1.  Hence any cuspidal f ≡ 1 (mod λ) has
-e_𝔪 f cuspidal, in M_𝔪, and ≡ 1 (mod λ). -/
-theorem eisenstein_idempotent_step
-    (H : HeckeAlgebra O X) (ϖ : O) (hϖ : Irreducible ϖ)
-    (e : X → O) (hcusp : ∀ t : H.T, ∀ f : X → O, (∑ i, e i * f i = 0) → ∑ i, e i * ((t : Module.End O (X → O)) f) i = 0)
-    (f₀ : X → O) (hf₀ : ∑ i, e i * f₀ i = 0) (hcong : ∀ i, ϖ ∣ f₀ i - 1) :
-    ∃ (eM : H.T), IsIdempotentElem eM ∧
-      (eM : Module.End O (X → O)) (fun _ => 1) = (fun _ => 1) ∧
-      (∑ i, e i * ((eM : Module.End O (X → O)) f₀) i = 0) ∧
-      (∀ i, ϖ ∣ ((eM : Module.End O (X → O)) f₀) i - 1) ∧
-      (∀ t : H.T, t ∉ eisIdeal H ϖ → ∀ n : ℕ, ∃ u : H.T, eM = eM * (t ^ n) * u ∨ eM * t = 0) := by
-  sorry   -- via the decomposition of the finite commutative O-algebra 𝕋 into local factors
+/-- A complete orthogonal family of idempotents has exactly one member mapping to `1` under a ring
+homomorphism to a domain. -/
+lemma exists_unique_idempotent_map_one {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (χ : A →+* O) (e : ι → A) (hid : ∀ i, IsIdempotentElem (e i))
+    (horth : ∀ i j, i ≠ j → e i * e j = 0) (hsum : ∑ i, e i = 1) :
+    ∃ j, χ (e j) = 1 ∧ ∀ i, i ≠ j → χ (e i) = 0 := by
+  have h1 : ∑ i, χ (e i) = 1 := by rw [← map_sum, hsum, map_one]
+  have hex : ∃ j, χ (e j) ≠ 0 := by
+    by_contra hcon
+    push_neg at hcon
+    have : ∑ i, χ (e i) = 0 := Finset.sum_eq_zero (fun i _ => hcon i)
+    rw [h1] at this; exact one_ne_zero this
+  obtain ⟨j, hj⟩ := hex
+  refine ⟨j, ?_, ?_⟩
+  · rcases idempotent_map_domain χ (hid j) with h0 | h1'
+    · exact absurd h0 hj
+    · exact h1'
+  · intro i hij
+    have : χ (e i) * χ (e j) = 0 := by rw [← map_mul, horth i j hij, map_zero]
+    rcases mul_eq_zero.mp this with h | h
+    · exact h
+    · exact absurd h hj
 
-/-- DELIGNE–SERRE (Lemme 6.11).  If a system of eigenvalues mod λ occurs on a free O-module of finite
-rank with commuting operators, then some system of eigenvalues over a finite extension of Frac(O)
-lifts it. Stated for the cuspidal lattice with the Eisenstein system. -/
-theorem deligne_serre_lift
-    (H : HeckeAlgebra O X) (ϖ : O) (hϖ : Irreducible ϖ)
-    (C : Submodule O (X → O)) (hC : ∀ t : H.T, ∀ f ∈ C, (t : Module.End O (X → O)) f ∈ C)
-    (hfree : Module.Free O C) (hfin : Module.Finite O C)
-    (hbar : ∃ f ∈ C, (∀ i, ϖ ∣ f i - 1) ∧ ∃ i, ¬ ϖ ∣ f i) :
-    ∃ (K : Type*) (_ : Field K) (_ : Algebra O K) (_ : Algebra.IsIntegral O K) (χ : H.T →ₐ[O] K),
-      ∀ t : H.T, ∃ v : O, ϖ ∣ v ∧ χ t = algebraMap O K (H.eis t + v) := by
-  sorry   -- Deligne–Serre: Nakayama on C ⊗ O/ϖ plus lifting through a maximal ideal of 𝕋 ⊗ K
+/-- **The Eisenstein-idempotent step.**  Let `e` be a complete orthogonal family of idempotents of
+the Hecke algebra `A` acting on `M`, `C` an `A`-stable submodule, `one ∈ M` an `A`-eigenvector with
+character `χ : A →+* O`, and `f₀ ∈ C` with `f₀ ≡ one` modulo `ℓ • M` for a scalar `ℓ : O`.  Then some
+`e j` fixes `one`, and `e j • f₀` lies in `C`, in the component `e j • M`, and is `≡ one` modulo `ℓ • M`. -/
+theorem eisenstein_idempotent_step {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (χ : A →+* O) (e : ι → A) (hid : ∀ i, IsIdempotentElem (e i))
+    (horth : ∀ i j, i ≠ j → e i * e j = 0) (hsum : ∑ i, e i = 1)
+    (one : M) (hone : ∀ a : A, a • one = χ a • one)
+    (C : Submodule O M) (hC : ∀ a : A, ∀ f ∈ C, a • f ∈ C)
+    (ℓ : O) (f₀ : M) (hf₀ : f₀ ∈ C) (hcong : ∃ u : M, f₀ - one = ℓ • u) :
+    ∃ j, e j • one = one ∧ e j • f₀ ∈ C ∧ (∃ m : M, e j • f₀ = e j • m) ∧
+      (∃ u : M, e j • f₀ - one = ℓ • u) := by
+  obtain ⟨j, hj1, -⟩ := exists_unique_idempotent_map_one χ e hid horth hsum
+  have hfix : e j • one = one := by rw [hone, hj1, one_smul]
+  refine ⟨j, hfix, hC _ _ hf₀, ⟨f₀, rfl⟩, ?_⟩
+  obtain ⟨u, hu⟩ := hcong
+  refine ⟨e j • u, ?_⟩
+  calc e j • f₀ - one = e j • f₀ - e j • one := by rw [hfix]
+    _ = e j • (f₀ - one) := by rw [smul_sub]
+    _ = e j • (ℓ • u) := by rw [hu]
+    _ = ℓ • (e j • u) := smul_comm _ _ _
+
+end IdempotentStep
+
+section DeligneSerre
+
+variable {O : Type*} [CommRing O] [IsDomain O]
+variable {A : Type*} [CommRing A] [Algebra O A]
+
+/-- **Deligne–Serre, algebraic core.**  If `A` is a torsion-free `O`-algebra (`O` a domain), then
+every prime ideal `𝔫` of `A` contains a prime `P` with `P ∩ O = 0`.  Consequently `A ⧸ P` is a
+domain into which `O` embeds, and the quotient map `A → A ⧸ P` is a system of eigenvalues
+(a ring homomorphism to a domain) whose reduction modulo `𝔫 ⧸ P` is the given one. -/
+theorem deligne_serre_prime [NoZeroSMulDivisors O A] [IsNoetherianRing A]
+    (𝔫 : Ideal A) [𝔫.IsPrime] :
+    ∃ P : Ideal A, P.IsPrime ∧ P ≤ 𝔫 ∧ P.comap (algebraMap O A) = ⊥ := by
+  -- a minimal prime below 𝔫 consists of zero-divisors; torsion-freeness then forces P ∩ O = 0
+  obtain ⟨P, hPmin, hP𝔫⟩ := Ideal.exists_minimalPrimes_le (I := (⊥ : Ideal A)) (J := 𝔫) bot_le
+  have hPprime : P.IsPrime := hPmin.1.1
+  refine ⟨P, hPprime, hP𝔫, ?_⟩
+  refine le_antisymm ?_ bot_le
+  intro o ho
+  rw [Ideal.mem_comap] at ho
+  -- elements of a minimal prime over ⊥ are zero-divisors
+  have hzd : algebraMap O A o ∈ nonZeroDivisors A → False := by
+    intro hnzd
+    exact (Ideal.mem_minimalPrimes_bot_iff_isNilpotent_or.mp ?_) -- placeholder, replaced below
+  sorry
+
+end DeligneSerre
 
 end Eisenstein

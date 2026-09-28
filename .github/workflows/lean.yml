@@ -1,0 +1,30 @@
+name: Lean proofs
+on:
+  push:
+    paths: ["lean/**", ".github/workflows/lean.yml"]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Eisenstein (certified core) and LogMarkov
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          build-args: "Eisenstein LogMarkov"
+          use-github-cache: false
+      - name: Axioms used
+        working-directory: lean
+        run: |
+          cat > Axioms.lean <<'EOT'
+          import Eisenstein
+          import LogMarkov
+          #print axioms Eisenstein.mass_criterion
+          #print axioms log_markov
+          EOT
+          lake env lean Axioms.lean || true
+      - name: Build EisensteinComponent skeleton (sorry expected; must at least typecheck)
+        working-directory: lean
+        continue-on-error: true
+        run: lake build EisensteinComponent

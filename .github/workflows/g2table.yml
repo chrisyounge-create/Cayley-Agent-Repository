@@ -1,0 +1,21 @@
+name: G2 level-3 table (weights 1-77, T2/T5/T7)
+on:
+  workflow_dispatch:
+jobs:
+  table:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy sympy
+      - name: build table
+        working-directory: g2table
+        run: timeout 20000 python3 g2_table.py || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: g2table-${{ github.run_id }}
+          path: |
+            g2table/g2_table.json
+            g2table/g2_table.log

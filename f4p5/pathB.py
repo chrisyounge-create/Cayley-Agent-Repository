@@ -6,6 +6,7 @@ import f4_p5 as F
 from f4_nbrs_head import hnf_rows
 pari = F.pari; p = F.p; E = F.E; GRAM = F.GRAM
 I27 = np.array(F.I27, dtype=np.int64).reshape(-1)[:27] if np.ndim(F.I27) > 1 else np.array(F.I27, dtype=np.int64)
+LIMIT = 200000
 def G0_of(S):
     Sr, piv = F.rref_p(S)
     def red(vv):
@@ -49,9 +50,16 @@ def analyse(S):
     G0 = G0_of(S)
     B = hnf_rows([list(map(int, g)) for g in G0] + [list(map(int, p*e)) for e in E])
     Gram = B @ GRAM @ B.T
-    res = pari.qfauto(gp_mat(Gram)); order = int(res[0])
-    OM = closure([np_mat(g) for g in res[1]]) if order <= 200000 else None
-    stab = jordan_stab(B, OM) if OM is not None else None
+    res = pari.qfauto(gp_mat(Gram)); order = int(res[0]); order_used = order
+    if order > LIMIT:
+        trv = B @ I27.astype(np.int64) * 0 + B @ np.ones(27, dtype=np.int64) * 0     # placeholder, replaced below
+        tr_of_rows = np.array([int(F.trace(b)) for b in B], dtype=np.int64)          # trace of each basis vector of M
+        Gtr = np.outer(tr_of_rows, tr_of_rows)                                        # invariant form tr(x)tr(y)
+        res = pari.qfauto(pari([gp_mat(Gram), gp_mat(Gtr)])); order_used = int(res[0])
+    if order_used > LIMIT:
+        return dict(order_OM=order, order_used=order_used, big=True, stab=None, lift_stab=None, types=None, inv=invariants(Gram))
+    OM = closure([np_mat(g) for g in res[1]])
+    stab = jordan_stab(B, OM)
     Ls = F.neighbours_of_S(S); types = [F.typ(L) if F.is_albert(L) else -1 for L in Ls]
     keys = [L.tobytes() for L in Ls]
     lift_stab = []
@@ -61,12 +69,16 @@ def analyse(S):
             img = hnf_rows([list(map(int, r)) for r in (L @ A)])
             if img.tobytes() == keys[c]: cnt += 1
         lift_stab.append(cnt)
-    return dict(order_OM=order, stab=len(stab), lift_stab=lift_stab, types=types, inv=invariants(Gram))
+    return dict(order_OM=order, order_used=order_used, stab=len(stab), lift_stab=lift_stab, types=types, inv=invariants(Gram))
 if __name__ == "__main__":
     rng = np.random.default_rng(int(sys.argv[1])); budget = float(sys.argv[2]); out = sys.argv[3]; t0 = time.time(); n = 0
     with open(out, 'a') as fh:
         while time.time() - t0 < budget:
             v = F.random_rank_one(rng); S, _, _ = F.p1_point_through(v, rng)
             if S is None: continue
-            r = analyse(S); r['seed'] = int(sys.argv[1]); r['n'] = n; r['S'] = S.tolist(); fh.write(json.dumps(r) + "\n"); fh.flush(); n += 1
+            try:
+                r = analyse(S)
+            except Exception as ex:
+                r = dict(error=repr(ex)[:300])
+            r['seed'] = int(sys.argv[1]); r['n'] = n; r['S'] = S.tolist(); fh.write(json.dumps(r) + "\n"); fh.flush(); n += 1
     print(f"{n} six-spaces in {time.time()-t0:.0f}s")

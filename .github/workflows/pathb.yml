@@ -36,8 +36,10 @@ jobs:
         working-directory: f4p5
         env:
           F4P: ${{ github.event.inputs.prime }}
+        continue-on-error: true
         run: python3 pathB.py $((${{ github.run_id }} % 100000 * 100 + ${{ matrix.idx }})) ${{ github.event.inputs.seconds }} out_${{ matrix.idx }}.jsonl
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: pathB-${{ github.run_id }}-${{ matrix.idx }}
           path: f4p5/out_${{ matrix.idx }}.jsonl

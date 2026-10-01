@@ -5,7 +5,7 @@ from sympy.matrices.normalforms import hermite_normal_form
 def hnf_rows(vecs):
     return np.array(hermite_normal_form(Matrix([list(map(int, r)) for r in vecs]).T).T.tolist(), dtype=np.int64)
 p = 2; K = 4; q = p**K
-rng = np.random.default_rng(int(sys.argv[1]) if len(sys.argv) > 1 else 0)
+rng = np.random.default_rng(0)
 def cross_matrix(v):
     E = np.eye(27, dtype=np.int64); Sv = sharp(v); return np.array([sharp(E[i] + v) - sharp(E[i]) - Sv for i in range(27)])
 def solve_mod2(A, b):

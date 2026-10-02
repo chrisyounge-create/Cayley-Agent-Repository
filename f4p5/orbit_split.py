@@ -38,7 +38,8 @@ def split(fp, files, maxn, budget):
         if time.time() - t0 > budget: break
     return [len(c) for c in classes], len(grp)
 if __name__ == "__main__":
-    files = glob.glob(sys.argv[1] + '/**/*.jsonl', recursive=True)
+    files = [sys.argv[1]] if sys.argv[1].endswith('.jsonl') else glob.glob(sys.argv[1] + '/**/*.jsonl', recursive=True)
     for fp in json.loads(sys.argv[2]):
         sizes, tot = split(tuple(fp), files, int(sys.argv[3]), float(sys.argv[4]))
         print(f"fingerprint {tuple(fp)} ({tot} hits): {sum(sizes)} samples -> {len(sizes)} orbit(s), sizes {sizes}", flush=True)
+        with open(f"split_{'_'.join(map(str, fp))}.json", 'w') as fh: json.dump({'fingerprint': fp, 'hits': tot, 'examined': sum(sizes), 'orbit_sizes': sizes}, fh)

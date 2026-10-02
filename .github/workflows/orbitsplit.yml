@@ -1,0 +1,25 @@
+name: Path B exact orbit split (all samples of the doubled fingerprints)
+on:
+  workflow_dispatch:
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        fp: ["[[0,3,638,19084]]", "[[0,6,724,19610]]", "[[0,6,720,19610]]", "[[0,24,850,19608]]"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy sympy cypari2
+      - name: split
+        working-directory: f4p5
+        continue-on-error: true
+        run: timeout 20000 python3 orbit_split.py doubled_samples.jsonl '${{ matrix.fp }}' 100000 19500
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: orbitsplit-${{ strategy.job-index }}
+          path: f4p5/split_*.json

@@ -1,0 +1,45 @@
+name: F4 at p=5, Path B on J_E
+on:
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: "seconds of sampling per job"
+        default: "19800"
+      jobs:
+        description: "number of parallel jobs (max 20)"
+        default: "20"
+      prime:
+        description: "the prime p (2 = control with exactly known answer)"
+        default: "5"
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.mk.outputs.matrix }}
+    steps:
+      - id: mk
+        run: python3 -c "import json; print('matrix=' + json.dumps(list(range(int('${{ github.event.inputs.jobs }}')))))" >> $GITHUB_OUTPUT
+  sample:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        idx: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy sympy cypari2
+      - name: sample
+        working-directory: f4p5
+        env:
+          F4P: ${{ github.event.inputs.prime }}
+        continue-on-error: true
+        run: python3 pathB_E.py $((${{ github.run_id }} % 100000 * 100 + ${{ matrix.idx }})) ${{ github.event.inputs.seconds }} out_${{ matrix.idx }}.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pathBE-${{ github.run_id }}-${{ matrix.idx }}
+          path: f4p5/out_${{ matrix.idx }}.jsonl

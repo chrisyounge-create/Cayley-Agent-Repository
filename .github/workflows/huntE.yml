@@ -1,0 +1,27 @@
+name: Part III J_E fixed-point sampling (rare orbits)
+on:
+  workflow_dispatch:
+jobs:
+  hunt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        j: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy sympy cypari2
+      - name: sample
+        working-directory: f4p5
+        continue-on-error: true
+        run: |
+          CLS=$(python3 -c "j=${{ matrix.j }}; print(','.join(str(c) for c in range(1,49) if c % 20 == j))")
+          timeout 20000 python3 fixsample_E.py "$CLS" 19500 ${{ matrix.j }} fixE_${{ matrix.j }}.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: huntE-${{ matrix.j }}
+          path: f4p5/fixE_*.json

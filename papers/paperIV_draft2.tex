@@ -1,0 +1,177 @@
+\documentclass[11pt]{amsart}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,array,enumitem,xcolor,hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{computation}[theorem]{Computation}
+\renewcommand{\O}{\mathbb{O}}\newcommand{\Sd}{\mathbb{S}}\newcommand{\Hq}{\mathbb{H}}\newcommand{\Z}{\mathbb{Z}}\newcommand{\Q}{\mathbb{Q}}\newcommand{\R}{\mathbb{R}}\newcommand{\C}{\mathbb{C}}\newcommand{\F}{\mathbb{F}}
+\newcommand{\Stab}{\operatorname{Stab}}\newcommand{\Aut}{\operatorname{Aut}}\newcommand{\Der}{\operatorname{Der}}\renewcommand{\Im}{\operatorname{Im}}
+\title[Zero divisors of the integral sedenions]{Zero divisors of the integral sedenions\\ and the compact $G_2$\\[4pt] {\normalsize Part IV of the Octonion Program record}}
+\author{Christopher Younge}
+\address{Philadelphia, PA}
+\date{4 October 2026 --- working draft 2, not for circulation}
+\begin{document}
+\begin{abstract}
+We study the zero divisors of the integral sedenions, the Cayley--Dickson double of Coxeter's order of integral octonions, and their interaction with the arithmetic of the compact group $G_2$. Among the $57{,}600$ sedenions whose two octonion halves are units, exactly $7{,}560$ are zero divisors, namely those whose halves are imaginary and orthogonal; they fall into two $G_2(\Z)$-orbits of sizes $6{,}048$ and $1{,}512$, distinguished by the type (Lipschitz or Hurwitz) of the quaternion subalgebra they generate, and the $84{,}672$ ordered pairs $(x,y)$ with $xy=0$ form seven free $G_2(\Z)$-orbits: the integral shadow of Moreno's theorem that the real unit zero-divisor pairs form the Lie group $G_2$. Over $\R$ the zero-divisor manifold is $G_2/\mathrm{Sp}(1)$ and its Hecke algebra $\mathcal H(G_2,\mathrm{Sp}(1))$ is computed in low weights. The conic of a quaternion subalgebra modulo $p$ meets the maximal-parahoric class set of the compact $G_2$ at $p$ in a pattern governed by the octahedral group $S_4$: for $p\in\{3,5,7,11\}$ each conic lies in a single class determined by the type of the zero divisor, and for $p\ge 13$ it splits into $S_4$-orbits, with class stabilisers $192/m$ and $48/m$; this is proved for all $p\ge 5$. Zero-divisor periods of algebraic modular forms on $G_2$ at level~3 are defined; they are the $D^1$-periods of Gan and Savin's exceptional see-saw, and the period along the conic separates Iwahori-new forms from old ones. Three constructions of a sedenion spectral geometry in the sense of Farnsworth and Boyle are shown to admit no finite Dirac operator beyond a scalar mass, and the Euler product of the norm-counting zeta function is shown to survive exactly up to the sedenions along the Cayley--Dickson ladder. All computations and code are deposited in the program's repository.
+\end{abstract}
+\maketitle
+\tableofcontents
+
+\section{Introduction and summary}
+Parts I and II of this record \cite{PartI,PartII} concern class sets and Hecke modules of the compact groups $G_2$ and $F_4$ built from Coxeter's integral octonions $\O_\Z$ (the $E_8$ lattice). The present part goes one rung further on the Cayley--Dickson ladder, to the sedenions $\Sd=\O\oplus\O\ell$, and asks what the first failure of division has to do with the arithmetic developed so far. The answer is more structured than expected.
+
+\begin{enumerate}[leftmargin=2em]
+\item[(a)] The integral sedenions $\Sd_\Z=\O_\Z\oplus\O_\Z\ell$ form the lattice $E_8\oplus E_8$. Their zero divisors with unit halves are \emph{exactly} the elements $a+b\ell$ with $a,b$ imaginary orthogonal units (Theorem~\ref{thm:zd}); there are $7{,}560$ of them, each with a $4$-dimensional annihilator, and they form two $G_2(\Z)$-orbits separated by the type of the quaternion subalgebra $\langle 1,a,b,ab\rangle$. The ordered zero-divisor pairs form seven free $G_2(\Z)$-orbits (Theorem~\ref{thm:seven}).
+\item[(b)] Over $\R$ the unit zero divisors form $G_2/\mathrm{Sp}(1)$ and Moreno's $G_2$ is the sphere bundle of their annihilators. The Hecke algebra $\mathcal H(G_2,\mathrm{Sp}(1))$, a non-commutative algebra with continuous families of idempotents, has blocks of sizes $1,3,3,6,8,10,6$ on the representations of dimensions $1,7,14,27,64,77,77'$ (Section~\ref{sec:hecke}).
+\item[(c)] The conic law (Theorem~\ref{thm:conic}): the isotropic lines of $\Im\Hq_z\otimes\F_p$ form a conic $\cong\mathbb P^1(\F_p)$, and its intersection with the maximal-parahoric class set of the compact $G_2$ at $p$ is governed by the octahedral group $S_4$. The two zero-divisor types index two classes for $p=3,5,7,11$ and the conics split into cube-orbits for $p\ge 13$.
+\item[(d)] Zero-divisor periods of algebraic modular forms (Section~\ref{sec:periods}) are the $D^1$-periods of the Gan--Savin see-saw \cite{GanSavin}; the period along the conic vanishes exactly on the Iwahori-new forms of weight $2\omega_1$ at level~3, while their periods on other orbits do not.
+\item[(e)] Negatives (Section~\ref{sec:negatives}): in the Farnsworth--Boyle framework of non-associative spectral geometry \cite{FB13,BF14} the sedenions admit, in all constructions tried, no finite Dirac operator beyond a scalar mass; the sedenion analogue of the Albert algebra is not Jordan; and the Euler product of the norm-counting zeta function dies one doubling past the sedenions, where Ramanujan's $\Delta$ first enters.
+\end{enumerate}
+Everything in (a)--(d) was computed exactly (integer arithmetic, finite groups, or linear algebra at machine precision with independent checks); the conic law is proved for all $p\ge 5$ by a structural reduction to a finite computation (Section~\ref{sec:conic}).
+
+\section{The integral sedenions and their zero divisors}\label{sec:zd}
+Let $\O_\Z$ be Coxeter's maximal order of integral octonions, with norm $N$, trace $\mathrm{tr}$ and the $240$ units. The Cayley--Dickson double $\Sd=\O\oplus\O\ell$ has product $(a,b)(c,d)=(ac-\bar d b,\ da+b\bar c)$, conjugation $\overline{(a,b)}=(\bar a,-b)$ and norm $N(a,b)=N(a)+N(b)$; we take $\Sd_\Z=\O_\Z\oplus\O_\Z\ell$. On $200$ random triples the laws behave as classically known: $\Sd$ is flexible and power-associative; it is not commutative, associative or alternative, and $N(xy)/(N(x)N(y))$ ranged over $[0.709,1.316]$.
+
+\begin{theorem}\label{thm:zd}
+Let $x=(a,b)\in\Sd_\Z$ with $N(a)=N(b)=1$. Then $x$ is a zero divisor if and only if $a$ and $b$ are both imaginary ($\mathrm{tr}=0$) and orthogonal. There are $7{,}560$ such elements; each has a $4$-dimensional annihilator $\{y: xy=0\}$. No unit of $\Sd_\Z$ (norm~$1$) is a zero divisor.
+\end{theorem}
+\begin{proof}
+Exhaustive computation over all $240^2=57{,}600$ pairs $(a,b)$ of units: the left-multiplication matrix $L_x$ is singular exactly for the $7{,}560$ pairs with $\mathrm{tr}\,a=\mathrm{tr}\,b=0$ and $\langle a,b\rangle=0$ (the other seven combinations of the three conditions never give a zero divisor), and its kernel has dimension $4$ in every case. A unit has one half zero and all $230{,}400$ products of units have norm~$1$.
+\end{proof}
+The real version (imaginary, orthogonal, equal norm) is due to Moreno and to Khalil--Yiu; the count and the dimension $4$ reproduce Moreno's dimension count $11+3=14=\dim G_2$ for the set of unit zero-divisor pairs \cite{Moreno}.
+
+\begin{theorem}\label{thm:seven}
+The group $G_2(\Z)=\Aut(\O_\Z)$ (order $12{,}096$) acts on the $7{,}560$ zero divisors with two orbits, of sizes $6{,}048$ and $1{,}512$, with stabilisers of orders $2$ and $8$. The quaternion subalgebra $\Hq_z=\langle 1,a,b,ab\rangle\cap\O_\Z$ contains $8$ units (Lipschitz type) on the large orbit and $24$ (Hurwitz type) on the small one, and these are exactly the numbers of zero divisors $y$ in the annihilator of $x$ among the $7{,}560$. The $84{,}672=7\cdot 12{,}096$ ordered pairs $(x,y)$ of these zero divisors with $xy=0$ form seven free $G_2(\Z)$-orbits.
+\end{theorem}
+\begin{proof}
+Computation with the $12{,}096$ automorphisms in the Coxeter basis (each verified to be a sedenion automorphism acting diagonally on the two halves); the orbit and stabiliser counts are exact. The map $(a,b)\mapsto(a,-b)$ is an automorphism of $\Sd$; the half-swap preserves the zero-divisor set but is not an automorphism.
+\end{proof}
+\begin{remark}
+Moreno's theorem says the real unit zero-divisor pairs form a space homeomorphic to $G_2$; Theorem~\ref{thm:seven} is its integral shadow: seven copies of $G_2(\Z)$, acted on freely.
+\end{remark}
+
+\section{The zero-divisor manifold and its Hecke algebra}\label{sec:hecke}
+Over $\R$, a unit zero divisor is a pair $(a,b)$ of orthonormal imaginary octonions. $G_2$ acts transitively on such pairs, so the zero-divisor manifold is $ZD=G_2/K$ with $K$ the stabiliser of one pair.
+\begin{proposition}
+$K$ is $3$-dimensional with Lie algebra $\mathfrak{su}(2)$; it fixes $\Hq_z$ pointwise and acts on the $4$-dimensional annihilator of $z=(a,b)$ as $\mathrm{Sp}(1)$ acts on $\Hq$ (the commutant of $K$ on the annihilator is $4$-dimensional). Hence $ZD=G_2/\mathrm{Sp}(1)$ is the Stiefel manifold of orthonormal pairs in $\R^7$, of dimension $11$, and Moreno's $G_2$ is the unit-sphere bundle of the annihilators over it.
+\end{proposition}
+\begin{proof}
+Computed from the $14$ derivations of $\O$ in an orthonormal basis: the derivations killing $a$ and $b$ form a $3$-dimensional subalgebra, which kills $\langle 1,a,b,ab\rangle$ and preserves the annihilator, on which its commutant has dimension $4$.
+\end{proof}
+In Gan--Savin's notation \cite{GanSavin}, $K=D^1$ is the group of norm-one elements of the quaternion subalgebra $D=\Hq_z$, acting by $g\cdot(a,b)=(a,b\bar g)$; it is the pointwise stabiliser of $D$ in $\Aut(\O)$.
+
+The Hecke algebra of the homogeneous space is $\mathcal H(G_2,K)=\bigoplus_\pi M_{m_\pi}(\C)$ with $m_\pi=\dim\pi^K$ (Frobenius reciprocity: $m_\pi$ is the multiplicity of $\pi$ in $L^2(ZD)$). Decomposing $7\otimes 7$, $7\otimes 14$, $\mathrm{Sym}^3 7$ and $\mathrm{Sym}^2 14$ by the Casimir and counting $K$-fixed vectors:
+\begin{center}
+\begin{tabular}{l@{\quad}ccccccc}\toprule
+$\pi$ & $1$ & $7$ & $14$ & $27$ & $64$ & $77$ & $77'$\\
+$m_\pi=\dim\pi^K$ & $1$ & $3$ & $3$ & $6$ & $8$ & $10$ & $6$\\\bottomrule
+\end{tabular}
+\end{center}
+The $7$ gives $3$ because $K$ fixes exactly $\Im\Hq_z\subset\Im\O$; the $14$ gives $3$ because the centraliser of $K$ in $\mathfrak g_2$ is the other $\mathfrak{su}(2)$ of $\mathfrak{so}(4)\subset\mathfrak g_2$. Since $(G_2,K)$ is not a Gelfand pair, the idempotents of each block form continuous families (Grassmannians). The representation theory here is classical; the identification of $ZD$ with the sedenion zero divisors is what makes it ours. Every weight in the Path~A table of compact $G_2$ forms (Part~II) has $m_\pi>0$, which is what makes the periods of Section~\ref{sec:periods} possible.
+
+\section{Quaternion subalgebras and the conic law}\label{sec:conic}
+\subsection{Quaternion subalgebras of the Coxeter order}
+Every zero divisor $z=(a,b)$ determines $\Hq_z=\langle 1,a,b,ab\rangle\cap\O_\Z$, a quaternion order of the definite quaternion algebra it spans. Counting ordered orthogonal imaginary unit pairs per subalgebra ($6\cdot 4=24$ in both cases) gives:
+\begin{proposition}\label{prop:count}
+$\O_\Z$ contains $63$ quaternion subalgebras of Hurwitz type ($24$ units) and $252$ of Lipschitz type ($8$ units). Their stabilisers in $G_2(\Z)$ have orders $192$ and $48$; the pointwise stabilisers have orders $8$ and $2$ (the stabilisers of the zero divisors of Theorem~\ref{thm:seven}), and in both cases the quotient acting faithfully on $\Im\Hq_z$ is the octahedral group $S_4$.
+\end{proposition}
+\begin{proof}
+$1512/24=63$, $6048/24=252$; $12096/63=192$, $12096/252=48$; the pointwise stabilisers were computed directly, and $192/8=48/2=24=|S_4|$, with $S_4$ the full rotation group of the cube $\{\pm i,\pm j,\pm k\}$, realised in both cases by the computation of Section~\ref{sec:periods} (orbit sizes $6,8,12$ below).
+\end{proof}
+
+\subsection{The conic}
+Fix an odd prime $p$. The space $\Im\O\otimes\F_p$ is a nondegenerate $7$-dimensional quadratic space; its isotropic lines number $(p^6-1)/(p-1)$ and form the maximal-parahoric level-$p$ structures of the compact $G_2$, so that the class set is $X_p=G_2(\Z)\backslash\{\text{isotropic lines}\}$ (Part~I). For a zero divisor $z$, $\Im\Hq_z\otimes\F_p$ is a nondegenerate ternary space, so its isotropic lines form a conic $C_z\cong\mathbb P^1(\F_p)$ with $p+1$ points, on which $\Stab(\Hq_z)$ acts through $S_4\subset\mathrm{PGL}_2(\F_p)$.
+
+\begin{theorem}[Conic law]\label{thm:conic}
+Let $p\ge 5$ and $z$ a zero divisor. The $G_2(\Z)$-classes of the points of $C_z$ are exactly the $S_4$-orbits on $\mathbb P^1(\F_p)$, whose sizes lie in $\{6,8,12,24\}$ (cube faces, vertices, edges, and generic), and the stabiliser in $G_2(\Z)$ of a conic point in an orbit of size $m$ has order $192/m$ (Hurwitz type) or $48/m$ (Lipschitz type). In particular each conic lies in a single class if and only if $p+1\in\{6,8,12\}$, i.e. $p\in\{5,7,11\}$; for $p=3$ the conic ($4$ points) also lies in a single class, with the exceptional stabilisers $432$ and $36$.
+\end{theorem}
+\begin{lemma}\label{lem:unique}
+For $p\ge 5$, an isotropic line lying on the conic of a quaternion subalgebra of given type lies on no other conic of that type.
+\end{lemma}
+\begin{proof}
+Let $\Hq_1\ne\Hq_2$ be suborders of the same type, $M_i=\Im\Hq_i$ (rank $3$). Since $\Hq_i=B_i\cap\O_\Z$ for the $\Q$-subalgebra $B_i$ it spans, $B_1\ne B_2$, and two distinct quaternion subalgebras of $\O$ meet in a subalgebra of dimension $\le 2$ (a $3$-dimensional subalgebra of a quaternion algebra does not exist); hence $M_1\cap M_2$ has rank $\le 1$. The conics $C_1,C_2$ modulo $p$ share a point only if $\bar M_1\cap\bar M_2\subset\Im\O\otimes\F_p$ contains a nonzero isotropic vector. Now $\dim_{\F_p}(\bar M_1\cap\bar M_2)=6-\operatorname{rank}_p(M_1+M_2)$, and $\operatorname{rank}_p(M_1+M_2)=\operatorname{rank}(M_1+M_2)$ unless $p$ divides the index of $M_1+M_2$ in its saturation. So either (i) $p$ divides that index, or (ii) $\bar M_1\cap\bar M_2$ is the reduction of $M_1\cap M_2$, which is $0$ or $\Z v$ with $v$ a common imaginary vector, isotropic mod $p$ only if $p\mid N(v)$.
+
+Computation over all $252\cdot 251/2=31{,}626$ Lipschitz pairs and $63\cdot 62/2=1{,}953$ Hurwitz pairs (code \texttt{g2table/lemma43.py}): the saturation indices take the values $1,2,3,4,5,6,8,10$ (Lipschitz) and $1,2,3,4,5,6,7,8$ (Hurwitz), so their prime factors lie in $\{2,3,5,7\}$; the pairs with $\operatorname{rank}(M_1+M_2)=5$ ($6{,}426$ Lipschitz, $1{,}197$ Hurwitz) have common directions of norm $1$ or $2$ (Lipschitz) and $1$ or $3$ (Hurwitz). Hence for $p\ge 11$ case (i) never occurs and case (ii) gives no isotropic vector: the conics are disjoint. For $p=5$ and $p=7$, case (i) occurs for $15+75$ pairs at $p=5$ and $23$ Hurwitz pairs at $p=7$; for each of these the intersection $\bar M_1\cap\bar M_2$ was computed over $\F_p$ and found to contain no isotropic vector, while case (ii) is excluded as before since $p\nmid N(v)\in\{1,2,3\}$. This proves the lemma for all $p\ge 5$. (For $p=3$ it fails: $3\mid N(v)$ for the Hurwitz pairs with a common direction of norm $3$, and the conics do share points, which is why the stabilisers $432,36$ at $p=3$ exceed $192/4$ and $48/4$.)
+\end{proof}
+\begin{proof}[Proof of Theorem \ref{thm:conic} from Lemma \ref{lem:unique}]
+Let $\ell\in C_z$ and $g\in G_2(\Z)$ with $g\ell\in C_z$. Then $g\ell$ lies on the conics of $\Hq_z$ and of $g\Hq_z$, both of the type of $z$; by the lemma $g\Hq_z=\Hq_z$, so $g\in\Stab(\Hq_z)$. Hence the $G_2(\Z)$-orbit of $\ell$ meets $C_z$ exactly in its $\Stab(\Hq_z)$-orbit, which is its $S_4$-orbit since the pointwise stabiliser acts trivially on $C_z$, and the stabiliser of $\ell$ in $G_2(\Z)$ equals its stabiliser in $\Stab(\Hq_z)$, of order $|\Stab(\Hq_z)|/m$. The orbit sizes of $S_4\subset\mathrm{PGL}_2(\F_p)$ on $\mathbb P^1(\F_p)$ are $24/|$point stabiliser$|$ with point stabilisers the cyclic subgroups of orders $4,3,2,1$, giving $6,8,12,24$; $S_4$ is transitive on $\mathbb P^1(\F_p)$ iff $p+1\in\{6,8,12\}$ (the case $4$ being $p=3$, where the lemma fails and the stabilisers are larger).
+\end{proof}
+\begin{computation}
+Independently of the proof, exact orbit computations for $p=3,5,7,11,13,17,19$ (four to forty zero divisors of each type per prime) give the class structure of the conic points shown in Table~\ref{tab:conic}; the stabiliser identity $|{\rm Stab}(\ell)|=|\Stab(\Hq_z)|/m$ holds in every case with $p\ge 5$, as the theorem predicts. The classes touched were also matched against the full class sets $X_5$ ($3$ classes, stabilisers $32,8,6$: the $6$-class is touched by no zero divisor) and $X_7$ ($8$ classes).
+\end{computation}
+\begin{table}[h]\centering
+\begin{tabular}{c c l l}\toprule
+$p$ & $p+1$ & Lipschitz: (points, stabiliser) & Hurwitz: (points, stabiliser)\\\midrule
+3 & 4 & $(4,36)$ & $(4,432)$\\
+5 & 6 & $(6,8)$ & $(6,32)$\\
+7 & 8 & $(8,6)$ & $(8,24)$\\
+11 & 12 & $(12,4)$ & $(12,16)$\\
+13 & 14 & $(8,6)+(6,8)$ & $(8,24)+(6,32)$\\
+17 & 18 & $(12,4)+(6,8)$ & $(12,16)+(6,32)$\\
+19 & 20 & $(12,4)+(8,6)$ & $(12,16)+(8,24)$\\\bottomrule
+\end{tabular}
+\caption{Class structure of the conic points of a zero divisor; stabilisers are $48/m$ and $192/m$ for $p\ge 5$.}\label{tab:conic}
+\end{table}
+\begin{remark}
+The incidence counts are now explained: $63(p+1)$ Hurwitz and $252(p+1)$ Lipschitz incidences fall on classes of sizes $12096\,m/192$ and $12096\,m/48$, one conic through each point.
+\end{remark}
+
+\section{Zero-divisor periods}\label{sec:periods}
+\subsection{Definition}
+Let $f$ be an algebraic modular form of weight $\pi$ for the compact $G_2$ at a parahoric level at $p=3$: a function on the level-$3$ structures $x$ (isotropic lines, planes or flags mod~$3$) with $f(x\gamma)=\pi(\gamma)^{-1}f(x)$, in the conventions of \cite{PartII}. For a zero divisor $z$ with continuous stabiliser $K_z$, and $u\in\pi^{K_z}$, put
+\[P_{z,u}(f)=\sum_{x\ \text{compatible with }z}\langle f(x),u\rangle,\qquad x\text{ compatible}\iff\text{the line of }x\text{ lies in }\Im\Hq_z\bmod 3,\]
+and more generally, for any orbit $O$ of the finite group $\Stab(\Hq_z)$ on the structures, $P_{z,O}(f)=\mathrm{proj}_{\pi^{K_z}}\sum_{x\in O}f(x)$. Every zero divisor has exactly $4$ compatible lines (the conic at $p=3$).
+
+\subsection{Trivial weight}
+At the maximal parahoric level $X_3$ has two classes (stabilisers $432,36$) and $T_2$-eigenvalues $126$ (Eisenstein) and $9$ (the lift of $3.6.a.a$). By Theorem~\ref{thm:conic} the four conic points of a Hurwitz zero divisor lie in the $432$-class and those of a Lipschitz one in the $36$-class, so $P_z(f)=4f(\text{class of }z)$: for the cusp form, normalised $f=(-1,1/12)$, the periods are $-4$ and $1/3$.
+
+\subsection{Weights 14 and 27}
+Weight $14$ (adjoint): one form at level~$3$ ($T_2=-18$, at the plane and flag levels), whose conic periods vanish for both types. Weight $27$ ($2\omega_1$): at the Iwahori level a $7$-dimensional space with $T_2\in\{40.5\ (\times 2),\ 0\ (\times 3),\ -10.768,\ 6.268\}$, the irrational pair being the roots of $x^2+4.5x-67.5$ and new at the Iwahori level; the others descend to the maximal parahoric levels, where $(T_2,T_5)=(81/2,\,2034/5)$ and $(0,\,11466/25)$ (twice), computed with the calibration $(9,810)$ and $(126,19530)$ in trivial weight.
+
+\begin{computation}\label{comp:periods}
+(i) The conic period $P_{z,u}$ vanishes identically on the Iwahori-new forms and is nonzero on all old forms, for both types. (ii) Over all $\Stab(\Hq_z)$-orbits ($51$ orbits for Lipschitz, $21$ for Hurwitz type), the Iwahori-new forms have nonzero $P_{z,O}$ on $41/51$ resp.\ $16/21$ orbits, vanishing exactly on the orbits containing the conic flags (and a few others); the old forms are nonzero on every orbit.
+\end{computation}
+\subsection{Interpretation}
+In \cite{GanSavin} the pair $D^1\subset\Aut(\O)$ sits in a see-saw inside the adjoint $E_7$ of the Albert algebra, with $\Aut(\O)\times\mathrm{PGSp}_6$ and $D^1\times G_D$ ($G_D$ of type $D_6$) as dual pairs; the theta lift of the trivial representation of $D^1$ is a residue of a Siegel Eisenstein series on $G_D$, and by Pollack's integral and Chenevier's identity $L(s,\pi,\mathrm{Spin})=\zeta(s)L(s,\pi',\mathrm{Std})$ for $G_2$-parameters, the $D^1$-period of a form on the compact $G_2$ is governed by $L(1,\pi',\mathrm{Std})\ne 0$. Our periods are $D^1$-periods with specific local data at $3$. Computation~\ref{comp:periods}(ii) is in accordance: the genuine (Iwahori-new) forms have nonzero $D^1$-periods, and what vanishes is the period \emph{along the conic}, a local statement about Iwahori-fixed vectors at $p=3$. The non-integral eigenvalues of the old forms, with denominators $2$, $5$, $25$, and their multiplicities suggest endoscopic parameters through $\mathrm{SO}(4)\subset G_2$, the stabiliser of a quaternion subalgebra; the vector-valued Satake dictionary needed to decide this is the next task. No level-one forms exist in weights $14$, $27$, $77'$ ($G_2(\Z)$-invariants vanish), so the old forms are genuinely level~$3$.
+
+\section{Negatives and boundaries}\label{sec:negatives}
+\subsection{Sedenion spectral geometries}
+Farnsworth and Boyle \cite{FB13,BF14} extend Connes' spectral triples to non-associative algebras: the Hilbert space must be a bimodule in the algebra's own class (every identity surviving the replacement of one algebra element by a vector), the order conditions become vanishing associators in $B=\Omega A\oplus H$, and the gauge group is $\Aut(A)$. For the sedenions acting on themselves: the flexible order-zero law holds and the alternative ones fail; the derivation algebra is $14$-dimensional and inner (inside $\mathfrak{so}(16)\oplus\R$); the fermions decompose as $2(1+7)$ under $G_2$ with the $S_3$ of $\Aut(\Sd)=G_2\times S_3$ as a family symmetry; the commutant of the left action is trivial, forcing $\gamma=\pm 1$ and $D_F=0$. On two copies $\Sd\oplus\Sd$ with $\gamma=\mathrm{diag}(1,-1)$, the flexible order-one condition forces $D_F$ to be a multiple of the identity for either real structure; with the opposite bimodule on the second copy, no $D_F$ survives; on the complex sedenions $\C\otimes\Sd$ with real-linear $D_F$, only complex scalars survive. The sedenion analogue $H_3(\Sd)$ of the Albert algebra violates the Jordan identity (relative size $0.96$; $H_3(\O)$ satisfies it to $10^{-15}$), so the Jordan-geometry route \cite{BF14} excludes the sedenions and admits the Albert algebra. In every construction the zero divisors do not enter the action.
+\subsection{Euler products along the ladder}
+The norm-counting Dirichlet series $\sum r(n)n^{-s}$ has an Euler product iff $r$ is multiplicative. It does for $\Z$, $\Z[i]$, the Hurwitz quaternions ($D_4$), the Coxeter octonions ($E_8$, $r=240\sigma_3$) and the integral sedenions ($E_8\oplus E_8$, $r=480\sigma_7$) --- the last only because $M_8(\mathrm{SL}_2(\Z))$ has no cusp forms --- and fails for the integral $32$-ions ($E_8^4$), since $E_4^4=E_{16}+\tfrac{3456000}{3617}\,E_4\Delta$. The counting zeta function of the $32$-ions, $\tfrac{16320}{3617}\zeta(s)\zeta(s-15)+c\,L(E_4\Delta,s)$, has two zeros on its critical line $\Re s=8$ below $t\approx 15$ and none up to $t=100$, where the Eisenstein part dominates by $10^5$--$10^6$; the Leech lattice's $\zeta(s)\zeta(s-11)-L(\Delta,s)$ has no zeros at all on $\Re s=6$ to $t=120$, its $57$ zeros to height $198$ lying near $\Re s\in[11.1,12.5]$ with spacings more rigid than GUE. The product over primes is lost exactly where $\Delta$ enters.
+
+\section{Open problems}
+\begin{enumerate}[leftmargin=2em]
+\item A conceptual proof of Lemma~\ref{lem:unique} replacing the finite computation at $p=5,7$ (the primes $5$ and $7$ divide some saturation indices without producing isotropic intersections).
+\item The vector-valued Satake dictionary for weight $2\omega_1$ and the identification of the old forms $(81/2,2034/5)$, $(0,11466/25)$; their exceptional theta lifts to genus-$3$ Siegel forms of level~$3$.
+\item The local analysis of the conic period: is it a $D^1(\Q_3)$-distinction statement for Iwahori-new local representations of $G_2(\Q_3)$?
+\item Index the seven free $G_2(\Z)$-orbits on zero-divisor pairs; the $32$-ions; the Okubo integral orders of \cite{Corr26} and their idempotent geometry against the conic law.
+\item Part III: the $J_E$ half of the $F_4$ class set at level~$5$ ($88\%$ of the mass found; exact deficits $720799/96768$ and $3$).
+\end{enumerate}
+
+\appendix
+\section{Code and data}
+Repository \texttt{chrisyounge-create/Cayley-Agent-Repository}: \texttt{sedenion.py} (doubling, laws), \texttt{sedenion\_geometry.py}, \texttt{sedenion\_step2.py}, \texttt{sedenion\_step3.py}, \texttt{sedenion\_step3\_complex.py} (spectral geometries), \texttt{zd\_hecke.py} (stabiliser, annihilator, multiplicities), \texttt{g2table/zd\_periods.py}, \texttt{g2table/zd\_periods\_vec.py} (periods), \texttt{g2table/lemma43.py} (proof of Lemma~\ref{lem:unique}), \texttt{beurling.py} (prime-correlation model). Dropbox notes \texttt{RH/SEDENIONS.md} through \texttt{RH/NEXT\_RUN\_ITEMS\_1\_TO\_4.md} contain the session records.
+
+\begin{thebibliography}{99}
+\bibitem{PartI} C. Younge, \emph{Class sets and Eisenstein congruences on compact exceptional groups}, Part I of this record (2026).
+\bibitem{PartII} C. Younge, \emph{The Hecke module of the compact $F_4$ at level~3}, Part II of this record (2026).
+\bibitem{Moreno} G. Moreno, The zero divisors of the Cayley--Dickson algebras over the real numbers, Bol. Soc. Mat. Mexicana 4 (1998).
+\bibitem{Brown} R. B. Brown, On generalized Cayley--Dickson algebras, Pacific J. Math. 20 (1967).
+\bibitem{GanSavin} W. T. Gan, G. Savin, An exceptional Siegel--Weil formula and poles of the spin $L$-function of $\mathrm{PGSp}_6$.
+\bibitem{Chen} G. Chenevier, Subgroups of $\mathrm{Spin}(7)$ or $\mathrm{SO}(7)$ with each element conjugate to some element of $G_2$, and applications to automorphic forms, Doc. Math. (2019).
+\bibitem{FB13} S. Farnsworth, L. Boyle, Non-associative geometry and the spectral action principle, JHEP 07 (2015) 023, arXiv:1303.1782.
+\bibitem{BF14} L. Boyle, S. Farnsworth, Non-commutative geometry, non-associative geometry and the standard model of particle physics, New J. Phys. 16 (2014) 123027.
+\bibitem{GG} N. Gillard, N. Gresnigt, Three fermion generations with two unbroken gauge symmetries from the complex sedenions, Eur. Phys. J. C 79 (2019) 446.
+\bibitem{Furey} C. Furey, Three generations, two unbroken gauge symmetries, and one eight-dimensional algebra, Phys. Lett. B 785 (2018).
+\bibitem{Corr26} D. Corradetti, A. Marrani, Integral orders for the Okubo algebra and idempotent geometries of the $E_8$ lattice, arXiv:2608.27762 (2026).
+\bibitem{ConwaySmith} J. H. Conway, D. A. Smith, \emph{On Quaternions and Octonions}, A K Peters (2003).
+\end{thebibliography}
+\end{document}

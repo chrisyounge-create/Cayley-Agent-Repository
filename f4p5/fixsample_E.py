@@ -5,7 +5,9 @@ from neighbors_struct import nullspace_modp
 p = 5
 V = pickle.load(open('autJE_perm.pkl', 'rb'))['V']
 NV = V.shape[0]
-reps = [r[:NV] for r in eval(re.sub(r'\s+', '', open('ccE_reps.g').read().replace('\\\n', '').split(':=', 1)[1]).rstrip(';'))]
+_txt = re.sub(r'\s+', '', open('ccE_reps.g').read().replace('\\\n', '').split(':=', 1)[1]).rstrip(';')
+_txt = re.sub(r'\[(\d+)\.\.(\d+)\]', lambda m: 'list(range(%s,%s+1))' % (m.group(1), m.group(2)), _txt)
+reps = [r[:NV] for r in eval(_txt)]
 src = open('fixsample.py').read().split("def mat_of(perm):")[1].split('if __name__ == "__main__":')[0]
 Bidx = []
 for i in range(len(V)):

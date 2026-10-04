@@ -1,0 +1,310 @@
+\documentclass[11pt]{amsart}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,array,hyperref,xcolor}
+\hypersetup{colorlinks,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{question}[theorem]{Question}
+\newcommand{\Z}{\mathbb{Z}}\newcommand{\Q}{\mathbb{Q}}\newcommand{\R}{\mathbb{R}}\newcommand{\A}{\mathbb{A}}\newcommand{\F}{\mathbb{F}}
+\newcommand{\T}{\mathbb{T}}\newcommand{\Tr}{\operatorname{Tr}}\newcommand{\Aut}{\operatorname{Aut}}\newcommand{\Stab}{\operatorname{Stab}}
+\newcommand{\Eis}{\mathrm{Eis}}\newcommand{\Gt}{G_2}\newcommand{\Ff}{F_4}
+\title[Class sets and Eisenstein congruences, I]{Class sets and Eisenstein congruences\\ on compact exceptional groups}
+\author{Christopher Younge}\thanks{Working draft, not for circulation.}
+\address{Philadelphia, PA}
+\date{September 27, 2026}
+\begin{document}
+\begin{abstract}
+Let $G$ be a reductive group over $\Q$ with $G(\R)$ compact and let $K\subset G(\A_f)$ be compact open. A theorem of Martin and Wakatsuki, extending Martin's work on definite quaternion algebras, says that if a prime $\ell$ divides the mass $\sum_x1/|\Gamma_x|$ of the class set $G(\Q)\backslash G(\A_f)/K$ then some cuspidal eigenform of level $K$ is Hecke congruent to the constant function modulo $\ell$. We record the form-level version of this statement---the primes at which an element of the cuspidal Eisenstein component is congruent to the constant function are \emph{exactly} the primes of the mass numerator---whose elementary core we have verified in Lean~4, and we use it as an instrument. By Gross's mass formula this identifies the Eisenstein primes as the primes of the Bernoulli numbers $B_{d_i}$ at the Weyl degrees $d_i$ of $G$ and of the cyclotomic factors $p^{d_i}-1$ at the level primes. We test the theorem by computing class sets and Hecke operators that were previously out of reach: the compact $\Gt$ at Iwahori level $p$ for $p=7,11,13,17$ (class numbers $29,187,523,2280$), and the compact $\Ff$ at level one and at the parahoric level $Q_3$ ($15$ classes; two commuting $15\times15$ Hecke matrices at $2$). At every level the observed congruence primes are exactly the predicted ones, and the carriers are determined: on $\Ff$ the primes $691$ and $73$ are the Eisenstein congruences of $\Delta$ and of the newform in $S_{12}(\Gamma_0(3))$, transported through the theta correspondence, while $41$ is carried by a form invisible to every classical theta series of weight $12$. For the compact $E_8$, whose class set has never been enumerated, the theorem proves Eisenstein congruences at the primes of the numerators of $B_{12},B_{18},B_{20},B_{24},B_{30}$. On the Niemeier genus the theorem recovers, from the mass alone, the congruence primes $131,283,593,617,691,3617,43867$ found in the published Hecke data of Chenevier and Lannes. The identification of the remaining $\Ff$ eigen-systems, including three stable forms on smaller groups, is the subject of Part~II.
+\end{abstract}
+\maketitle
+\section{Introduction}
+Gross \cite{Gross-AMF} observed that when $G(\R)$ is compact, automorphic forms on $G$ of trivial weight are simply functions on the finite set $X_K=G(\Q)\backslash G(\A_f)/K$, and Hecke operators are integer matrices counting adjacencies between classes. The constant function is always an eigenvector; its eigen-system is the analogue of the Eisenstein series. Following Mazur's study of the Eisenstein ideal for $\mathrm{GL}_2$ \cite{Mazur}, and Ramanujan's congruence $\tau(n)\equiv\sigma_{11}(n)\pmod{691}$ which is its prototype, one asks at which primes a cuspidal eigenform on $G$ can be congruent to the constant function.
+
+Martin \cite{Mar17} answered this for definite quaternion algebras and Martin--Wakatsuki \cite{MW24} for all reductive $G$ compact at infinity: if $\ell$ divides the mass $M=\sum_x1/|\Gamma_x|$, there is a cuspidal eigenform Hecke congruent to the constant function modulo $\ell$ (their Theorem~2.1; the depth of the congruence is at least $v_\ell(M)$). We were unaware of this work when the computations below were begun and rediscovered the argument; the statement we use is the following form-level version, which is essentially their Theorem~2.1 together with their Lemma~3.4.
+
+\begin{theorem}[after Martin--Wakatsuki]\label{thm:main}
+Let $L=\operatorname{lcm}|\Gamma_x|$, $e_x=L/|\Gamma_x|$, $g=\gcd_x e_x$ and $E=L M/g\in\Z$. For a prime $\ell$ the following are equivalent:
+\begin{enumerate}
+\item[(i)] $\ell\mid E$;
+\item[(ii)] there is an integer-valued cuspidal function $f$ on $X_K$ (i.e.\ $\sum_x e_x f(x)=0$) with $f\equiv1\pmod\ell$;
+\item[(iii)] there is an element $f$ of the cuspidal part of the Eisenstein component of $\Z_\ell^{X_K}$ with $f\equiv c\cdot1\pmod\lambda$ for a unit $c$.
+\end{enumerate}
+When they hold there is a cuspidal Hecke eigenform whose eigenvalues are all congruent to those of the constant function modulo a prime above~$\ell$.
+\end{theorem}
+The integer $E$ is the numerator of $M$ up to primes dividing the $|\Gamma_x|$; in every example below it equals the numerator of $M$ in lowest terms, with one instructive exception. The proof uses only two properties of the Hecke matrices, which are also the checks one runs on any computed Brandt matrix: the constant function is an eigenvector, and the matrices are symmetric for the mass-weighted inner product. What is new here is not the theorem but its use: the proof has been formalised and checked in Lean~4 against Mathlib (Appendix~\ref{app:lean}), and the statement is tested, at the form level and with the carriers identified, on the compact exceptional groups, where it had not been applied.
+
+Gross's mass formula \cite{Gross-Z} makes Theorem~\ref{thm:main} predictive. For $G$ of rank $r$ with Weyl degrees $d_1,\dots,d_r$, split at all finite places, with $K$ hyperspecial away from a finite set $S$ and Iwahori (or a fixed parahoric) at $p\in S$,
+\begin{equation}\label{eq:mass}
+M(K_S)=2^{-r}\prod_{i=1}^r|\zeta(1-d_i)|\cdot\prod_{p\in S}\ \prod_{i=1}^{r}\frac{p^{d_i}-1}{p-1}\cdot c_S,
+\end{equation}
+where $c_S$ is the index of the parahoric in the Iwahori subgroup. The Eisenstein primes therefore come in two kinds: \emph{Bernoulli-type} primes dividing the numerators of $\zeta(1-d_i)=-B_{d_i}/d_i$, and \emph{cyclotomic-type} primes dividing $p^{d_i}-1$ for a level prime $p$; a prime $\ell$ is of the second kind at level $p$ exactly when $\operatorname{ord}_\ell(p)$ divides some Weyl degree. For $\Gt$ ($d=2,6$) the level-one mass is $1/12096$ and there is no Bernoulli prime; for $\Ff$ ($d=2,6,8,12$) the level-one mass is $691/380414361600$ and $691$ is Ramanujan's prime; for $E_8$ ($d=2,8,12,14,18,20,24,30$) the numerator is the product of the numerators of $B_{12},B_{18},B_{20},B_{24},B_{30}$.
+
+The second part of the paper tests the theorem on data. We compute the class sets and several Hecke operators of the compact $\Gt$ at Iwahori level $p$ for $p=7,11,13,17$, extending the computations of Lansky and Pollack \cite{LP} (levels $\le7$); the class numbers $187$, $523$ and $2280$ are new, and the mass is recovered exactly at each level. We compute the class set of the compact $\Ff$ at the parahoric level $Q_3$ associated with the first fundamental coweight (nine classes on the standard Albert lattice, six on the Elkies--Gross lattice), and two commuting Hecke operators at $2$ on it. At level one we recover, from lattice enumeration alone, the eigenvalues predicted by the theta lift of $\Delta$ \cite{Pollack-theta,Shan}; at level $Q_3$ we determine the carriers of the three Eisenstein primes, and leave the identification of the remaining eigen-systems---which turns out to involve compact $G_2$-forms of weight $2\omega_2$, an $\mathrm{SO}(7)$-form on the genus of $E_7$, and a stable genus-$2$ parameter---to Part~II \cite{PartII}. In every case the primes at which a cuspidal eigenform is congruent to the constant function are exactly the primes of $E$. Finally, we run the same test on the genus of even unimodular lattices of rank $24$, using the neighbour counts published by Chenevier and Lannes \cite{CL}: the seven primes of the mass numerator are exactly the primes carrying form-level Eisenstein congruences, each Bernoulli numerator on the eigenform theory would assign it; the weights of the Hecke inner product on this genus are the reciprocals of the Weyl groups times the umbral groups of Cheng--Duncan--Harvey, and two of the Eisenstein eigenforms are explicit polynomials in the Coxeter number.
+
+The data also show \emph{which} eigenforms carry the Eisenstein primes. At $\Gt$ level $p$ every cyclotomic prime $\ell\mid(p^2\mp p+1)$ is carried by a non-tempered Arthur-type lift of a weight-$6$ newform $f$ of level $p$, and the $\Gt$ congruence is the classical congruence $f\equiv E_6\pmod\ell$ transported (Theorem~\ref{thm:carriers}); the primes from $p\mp1$ are carried by tempered forms. This is the same mechanism that explains $691$, $73$ and $41$ on $\Ff$.
+
+\subsection*{Acknowledgements} The computations were designed and carried out in collaboration with an AI system (Claude, Anthropic), which also drafted the text; all code, data and the Lean file are available (Appendix~\ref{app:data}). I thank the authors of \cite{CL} for making their neighbour tables public.
+
+\section{The existence theorem}\label{sec:thm}
+\subsection{Setting} Let $G$ be reductive over $\Q$ with $G(\R)$ compact, $K\subset G(\A_f)$ compact open, and $X=X_K=\{x_1,\dots,x_h\}$ the class set, with finite stabilisers $\Gamma_i$ and weights $w_i=1/|\Gamma_i|$. Integer-valued forms of trivial weight are $\Z^X$. A Hecke operator $T$ (for a double coset $KgK$) acts on $\Z^X$ by an integer matrix $B$ with
+\begin{itemize}
+\item[(H1)] $B\mathbf 1=N\mathbf 1$ for an integer $N$ (the number of $K$-neighbours);
+\item[(H2)] $w_iB_{ij}=w_jB_{ji}$.
+\end{itemize}
+By (H2) the pairing $\langle f,g\rangle=\sum_iw_if_ig_i$ is $\T$-invariant, so the Hecke algebra $\T\subset\operatorname{End}(\Z^X)$ is a commutative ring of self-adjoint operators. Let $L=\operatorname{lcm}|\Gamma_i|$, $e_i=Lw_i\in\Z$, $g=\gcd e_i$, and
+\[E:=\frac1g\sum_ie_i=\frac{LM}{g}\in\Z.\]
+The \emph{cuspidal lattice} is $C=\{f\in\Z^X:\sum_ie_if_i=0\}=\Z^X\cap\mathbf 1^\perp$; it is $\T$-stable by (H1), (H2). Fix a prime $\ell$, a finite extension of $\Q_\ell$ with ring of integers $\mathcal O$, uniformiser $\lambda$ and residue field $k$; write $\T_{\mathcal O}=\T\otimes\mathcal O$ and let $\mathfrak m=(\lambda,\ T-N_T:T\in\T)$ be the \emph{Eisenstein maximal ideal}. Since $\T_{\mathcal O}$ is a finite commutative $\mathcal O$-algebra, $\mathcal O^X=\bigoplus_{\mathfrak n}(\mathcal O^X)_{\mathfrak n}$ over its maximal ideals; the summand $M_{\mathfrak m}$ is the \emph{Eisenstein component}, the part on which $\T$ acts through eigen-systems congruent to $\chi_{\Eis}:T\mapsto N_T$ modulo $\lambda$. Note $\mathbf 1\in M_{\mathfrak m}$. Put $C_{\mathfrak m}=(C\otimes\mathcal O)\cap M_{\mathfrak m}$.
+
+\begin{theorem}[Martin--Wakatsuki \cite{MW24}, Theorem 2.1 and Lemma 3.4; form-level statement]\label{thm:exist}
+For a prime $\ell$ the following are equivalent:
+\begin{enumerate}
+\item[(i)] $\ell\mid E$;
+\item[(ii)] there is $f\in C$ with $f\equiv\mathbf 1\pmod\ell$ coordinatewise;
+\item[(iii)] there is $f\in C_{\mathfrak m}$ with $f\equiv c\mathbf 1\pmod\lambda$ for some $c\in\mathcal O^\times$.
+\end{enumerate}
+If they hold, there is a Hecke eigenform $f\in C\otimes\overline{\Q}_\ell$ with $\chi_f(T)\equiv N_T\pmod\lambda$ for every $T\in\T$.
+\end{theorem}
+\begin{proof}
+(i)$\Leftrightarrow$(ii). Let $\varphi:\Z^X\to\Z$, $\varphi(f)=\sum_i(e_i/g)f_i$. Since the $e_i/g$ are coprime, $\varphi$ is surjective; $C=\ker\varphi$ and $\varphi(\mathbf 1)=E$. If $\ell\mid E$ choose $u$ with $\varphi(u)=-E/\ell$ and put $f=\mathbf 1+\ell u\in C$. Conversely if $f=\mathbf 1+\ell u\in C$ then $0=E+\ell\varphi(u)$.
+
+(ii)$\Rightarrow$(iii). Let $f_0=\mathbf 1+\ell u\in C$ and let $e_{\mathfrak m}$ be the idempotent of the Eisenstein component. It is a polynomial in the Hecke operators, so it preserves $C\otimes\mathcal O$, and $e_{\mathfrak m}\mathbf 1=\mathbf 1$ since $\mathbf 1$ lies in $M_{\mathfrak m}$ and in no other component. Hence $e_{\mathfrak m}f_0=\mathbf 1+\ell e_{\mathfrak m}u\in C_{\mathfrak m}$ and $e_{\mathfrak m}f_0\equiv\mathbf 1$.
+
+(iii)$\Rightarrow$(i). Extend $\varphi$ $\mathcal O$-linearly. Then $\varphi(f)=0$ and $f-c\mathbf 1\in\lambda\mathcal O^X$ give $cE\in\lambda\mathcal O$, so $E\in\lambda\mathcal O\cap\Z=\ell\Z$.
+
+For the last assertion, the image $\bar C$ of $C\otimes\mathcal O$ in $k^X$ is $\T$-stable and by (ii) contains $\bar{\mathbf 1}$, an eigenvector with eigen-system $\bar\chi_{\Eis}$. The Deligne--Serre lemma \cite[Lemme 6.11]{DS} applied to the free $\mathcal O$-module $C\otimes\mathcal O$ with the commuting operators $\T$ gives an eigenvector in $C\otimes K'$, $K'$ a finite extension of the fraction field, whose eigen-system lifts $\bar\chi_{\Eis}$.
+\end{proof}
+
+\begin{proposition}\label{prop:E}
+Write $M=N/D$ in lowest terms. Then $D\mid L$, $Eg=(L/D)\,N$, and
+\[\{\ell:\ell\mid N\}\ \subseteq\ \{\ell:\ell\mid E\}\ \subseteq\ \{\ell:\ell\mid N\}\cup\{\ell:\ell\mid L/D\}.\]
+\end{proposition}
+\begin{proof}
+$D\mid L$ since $M$ is a sum of reciprocals of divisors of $L$. The identity is the definition of $E$. If $\ell\mid N$ then $\ell\mid Eg$, and $\ell\nmid g$ because the class attaining the full $\ell$-power of $L$ has $\ell\nmid e_i$; so $\ell\mid E$. The right-hand inclusion is immediate from the identity.
+\end{proof}
+Thus the primes of the mass numerator are always Eisenstein primes, and the only other possible Eisenstein primes are those at which some stabiliser has more $\ell$-torsion than the mass denominator records. The second case occurs: at $\Gt$ level $7$ the mass is $817/63$ and $E=2\cdot19\cdot43$, and the mod-$2$ congruence exists (\S\ref{sec:g2}). It is a feature of the integral statement, not a defect.
+
+\subsection{Three notions of congruence} It is essential to distinguish, in increasing strength:
+\begin{itemize}
+\item[(A)] a \emph{single-operator coincidence}: $\lambda_T(f)\equiv N_T\pmod\ell$ for one Hecke operator $T$;
+\item[(B)] a \emph{Hecke congruence}: $\lambda_T(f)\equiv N_T\pmod\lambda$ for every $T\in\T$ (the notion of \cite{MW24});
+\item[(C)] a \emph{form-level congruence}: the constant vector lies in the reduction modulo $\lambda$ of the saturated eigenlattice of the Galois orbit of $f$, equivalently (Theorem~\ref{thm:exist}(iii)) $\bar{\mathbf 1}\in\overline{C_{\mathfrak m}}$.
+\end{itemize}
+Clearly (C)$\Rightarrow$(B)$\Rightarrow$(A). Coincidences of type (A) are common at primes $\ell\nmid E$ and are not Eisenstein congruences; every test in \S\S\ref{sec:g2}--\ref{sec:niem} is of type (C), and every prime reported as a carrier passes it.
+
+\begin{remark}\label{rem:E}
+(a) Proposition~\ref{prop:E} is what makes the theorem predictive through the mass formula \eqref{eq:mass}.
+
+(b) Read on the counting side, the equivalence (i)$\Leftrightarrow$(ii) is a statement about integrality. For a Niemeier lattice $L$ one has $\theta_L=E_{12}+c_L\Delta$ with $c_L=24h(L)-65520/691$, so the number of vectors of norm $2n$ is $(65520/691)\sigma_{11}(n)+c_L\tau(n)$; this is an integer because the vectors exist, and its integrality is \emph{equivalent} to $\tau(n)\equiv\sigma_{11}(n)\pmod{691}$. In general the constant function is the ensemble average, whose ``counts'' (the Eisenstein series) carry a denominator; an actual class carries integer counts; the difference is cuspidal and must repair the denominator, which is the congruence. The primes of the mass are the primes at which the average fails to be integral.
+
+(c) The theorem says nothing about \emph{which} eigenform carries the congruence, nor that the Eisenstein component is a single eigen-system. An eigenvalue coincidence $\lambda_T\equiv N_T\pmod\ell$ for a single operator $T$ at a prime $\ell\nmid E$ is common and is not an Eisenstein congruence; the correct test, used throughout \S\S\ref{sec:g2}--\ref{sec:niem}, is (iii): the constant vector lies in the reduction modulo $\lambda$ of the saturated eigenspace lattice of a Galois orbit of eigen-systems.
+\end{remark}
+
+\subsection{Relation to previous mass-congruence theorems} Martin \cite{Mar17} proved, for definite quaternion algebras, that divisibility of the Eichler mass by $p$ produces a weight-$2$ Eisenstein congruence, and Martin--Wakatsuki \cite{MW24} extended this to algebraic modular forms on any reductive group compact at infinity (their Theorem~2.1), with the depth of the congruence bounded below by $v_p$ of the mass \cite{BKK}; they used it to produce non-endoscopic Eisenstein congruences on unitary groups of prime degree. Bergstr\"om--Dummigan \cite{BD} treat Eisenstein congruences for maximal parabolics on split groups and their relation to Bloch--Kato. The statement above adds nothing to the existence theorem; what it isolates is the exact integral criterion on the finite class set---the integer $E=LM/g$ governing the constant-vector obstruction, the equivalence with membership of $\bar{\mathbf 1}$ in the reduced cuspidal Eisenstein component, and the two-inclusion description of Proposition~\ref{prop:E}---in a form that can be checked by machine and used to certify congruences and identify their carriers on the exceptional groups.
+
+\section{The mass formula and the predicted primes}\label{sec:law}
+Gross \cite{Gross-Z} showed that groups over $\Z$ with $G(\R)$ compact and $G$ split at every prime exist exactly for the types $G_2$, $F_4$, $E_8$ (and suitable classical types), and gave the mass \eqref{eq:mass}. There is no compact $\Z$-form of type $E_6$ (the compact real form is outer; equivalently $\zeta(1-5)=0$ kills the mass) or $E_7$ (the compact form is inner but not pure inner; the two $\Z$-groups of type $E_7$ classified in \cite{GPR} are both non-compact at infinity). Combining \eqref{eq:mass} with Theorem~\ref{thm:exist} and Remark~\ref{rem:E}(a):
+\begin{corollary}\label{cor:law}
+Every prime dividing the numerator of $M(K_S)$ is an Eisenstein congruence prime of level $K_S$ in the sense of Theorem~\ref{thm:exist}(iii). In particular:
+\begin{itemize}
+\item for the compact $\Gt$ at Iwahori level $p$: the primes of $(p^2-1)(p^6-1)/(p-1)^2$ not absorbed by $12096=|\Gt(\F_2)|$;
+\item for the compact $\Ff$ at level one: $691$; at the parahoric level $Q_3$ (\S\ref{sec:f4}): $41,\,73,\,691$;
+\item for the compact $E_8$ at level one, whose class number is at least $13935$ and whose class set has never been enumerated: $691,\ 43867,\ 283\cdot617,\ 103\cdot2294797,\ 1721\cdot1001259881$;
+\item for the compact $\mathrm{SO}(24)$ (the Niemeier genus): $131,283,593,617,691,3617,43867$.
+\end{itemize}
+\end{corollary}
+
+\section{The compact $G_2$ at Iwahori level $p$}\label{sec:g2}
+\subsection{Construction} Let $\mathcal O$ be the Coxeter order of integral octonions and $\Gamma=\Aut(\mathcal O)=\Gt(\Z)$, of order $12096$. Following Lansky--Pollack \cite{LP}, the class set at Iwahori level $p$ is the set of $\Gamma$-orbits on the flag variety of $\Gt$ over $\F_p$: flags (line $\subset$ plane) of null trace-zero elements of $\mathcal O/p\mathcal O$ with $uv=vu=0$. There are $(p^6-1)/(p-1)$ null lines and as many planes, each plane containing $p+1$ lines, so $(p+1)(p^6-1)/(p-1)$ flags, and the mass is $\frac{(p+1)(p^6-1)}{(p-1)\cdot12096}$. The Hecke operator $T_q$ for $q\ne p$ counts, for a representative flag, the images of the $q(q^6-1)/(q-1)$ $q$-neighbour maps of $\mathcal O$ (Gross's $T(\omega_1^\vee)(q)$; here $126$, $1092$ and $19530$ for $q=2,3,5$) reduced modulo $p$, landing in each class.
+
+\subsection{Results}
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}rrrrl@{}}\toprule
+$p$ & flags & $h$ & $\sum_x1/|\Gamma_x|$ & $E$ (= Eisenstein primes)\\\midrule
+7 & 156{,}864 & 29 & $817/63$ & $2\cdot19\cdot43$\\
+11 & 2{,}125{,}872 & 187 & $703/4$ & $19\cdot37$\\
+13 & 5{,}631{,}276 & 523 & $67039/144$ & $7\cdot61\cdot157$\\
+17 & 27{,}154{,}764 & 2280 & $35919/16$ & $3^2\cdot13\cdot307$\\\bottomrule
+\end{tabular}
+\caption{Compact $G_2$ at Iwahori level $p$. In each case $\sum_x1/|\Gamma_x|$ equals Gross's mass exactly; every orbit size divides $12096$; $T_2,T_3$ (and $T_5$ for $p\le13$) have the required row sums and mass-weighted symmetry. The class number $29$ agrees with \cite{LP}; the others are new.}
+\end{table}
+The Eisenstein numbers follow the corollary in detail, including the cancellations: at $p=11$ the single factor $7$ of $11^6-1$ cancels against $12096$; at $p=13$ a second $7$ enters through $p+1=14$ and survives; at $p=17$ two $3$'s enter through $p+1=18$.
+
+\subsection{Carriers} For each $p$ and each prime $\ell\mid E$ we determined the Galois orbit of eigen-systems carrying the congruence, by the test of Remark~\ref{rem:E}(c) applied to the factors of the characteristic polynomial of $T_2$ (computed exactly with FLINT).
+\begin{table}[h]\centering\small
+\begin{tabular}{@{}rrp{9.2cm}@{}}\toprule
+$p$ & $\ell$ & carrier of the form-level congruence\\\midrule
+7 & 43 & rational, $(\lambda_2,\lambda_3)=(-3,60)$, multiplicity $3$ (the $T_2$-eigenvalue $-3$ has multiplicity $9$, splitting as $(-3,60)^{3}\oplus(-3,-4)^{6}$)\\
+7 & 19 & quadratic orbit $x^2-81x+1512$, multiplicity $2$\\
+7 & 2 & genuine (Remark~\ref{rem:E}(a)); joint Eisenstein eigenspace mod $2$ of dimension $9$\\
+11 & 37 & rational, $(\lambda_2,\lambda_3)=(15,56)$, multiplicity $3$\\
+11 & 19 & cubic orbit $x^3-81x^2+1377x+7263$, multiplicity $2$\\
+13 & 157 & quadratic orbit $x^2-39x+342$, multiplicity $3$\\
+13 & 61 & cubic orbit $x^3-102x^2+2565x-2592$, multiplicity $2$\\
+13 & 7 & neither the rational form $\lambda_2=-14$ nor the quartic orbit (its $T_3$-eigenvalues are not $\equiv1092$); by elimination the orbit of degree $385$\\
+17 & 13 & rational, $(\lambda_2,\lambda_3)=(9,156)$, multiplicity $3$\\
+17 & 3 & rational, $(\lambda_2,\lambda_3)=(-18,-60)$, multiplicity $1$\\
+17 & 307 & quartic orbit $x^4-117x^3+4257x^2-45063x-36774$ (Galois group $S_4$, $307$ unramified), multiplicity $2$; its two copies are the whole cuspidal Eisenstein component at $307$\\\bottomrule
+\end{tabular}
+\caption{Which eigenforms carry the Eisenstein congruences on $G_2$.}
+\end{table}
+Three conjectures suggested by the first two levels---that the carrier's Galois orbit has trace $81$; that $\ell$ ramifies in the carrier's coefficient field; that the prime entering through $p+1$ is carried by the large orbit---are each refuted at the next level. What governs the carriers is the following.
+
+\subsection{The carriers are Arthur-type lifts}\label{sec:carriers-lifts}
+Let $\mathrm{SO}(4)=(\mathrm{SL}_2^{\rm long}\times\mathrm{SL}_2^{\rm short})/\mu_2\subset\Gt$ be the stabiliser of a quaternion subalgebra of the octonions, so that the $7$-dimensional representation restricts as $(2,2)\oplus(1,3)$. For a newform $f\in S_6(\Gamma_0(p))$ consider the Arthur-type parameter $\psi_f=\varphi_f\boxtimes\nu$ with $\varphi_f$ on the long-root $\mathrm{SL}_2$ and the Arthur $\mathrm{SL}_2$ on the short root. Its Satake parameter at $q\ne p$ has $\chi_7=(q+1+q^{-1})+(q^{1/2}+q^{-1/2})\,a_q(f)q^{-5/2}$, and since the eigenvalue of $T(\omega_1^\vee)(q)$ on a trivial-weight form is $q^3\chi_7-1$ (the Eisenstein eigenvalue $q^6+\dots+q$ and the lift of $\mathsf{3.6.a.a}$ at level $3$, $(T_2,T_5,T_7)=(9,810,2472)$, both verify this normalisation),
+\[T_q(\psi_f)=q^4+q^3+q^2-1+(q+1)\,a_q(f),\qquad T_q(\mathrm{Eis})-T_q(\psi_f)=(q+1)\big(1+q^5-a_q(f)\big).\]
+\begin{theorem}\label{thm:carriers}
+At $\Gt$ Iwahori level $p\in\{7,11,13,17\}$ every newform $f\in S_6(\Gamma_0(p))$ occurs as $\psi_f$ in the class set, with multiplicity $3$ or $2$ according to its Atkin--Lehner sign at $p$ ($7$, $9$, $12$, $14$ eigen-slots in all); these lifts are non-tempered and are exactly the eigen-systems violating the tempered bound $|T_q+1|\le 7q^3$ at $q=3$ ($p=7,11,17$) or $q=2$ ($p=13$). The $\Gt$ Eisenstein congruence of $\psi_f$ modulo $\ell$ is the classical congruence $f\equiv E_6\pmod\ell$, and every cyclotomic carrier of Table~2 is such a lift: the prime dividing $p^2-p+1$ ($43,37,157,13$) is carried by the multiplicity-$3$ lift and the prime dividing $p^2+p+1$ ($19,19,61,307$) by the multiplicity-$2$ lift of the newform congruent to $E_6$ modulo that prime (verified in the coefficient fields at $q\le 11$). The primes from $p\mp1$ are carried by tempered forms: $3$ at $p=17$ by $(-18,-60)$, which is no lift ($a_2=-15$ would exceed the Deligne bound), and $2$ at $p=7$ by the genuine component of dimension~$9$.
+\end{theorem}
+\begin{proof}
+Exact eigenvalue matching of the predicted $(T_2,T_3)$ against the joint spectra of the Hecke matrices, newform coefficients from PARI; the carrier orbits of Table~2 are the Galois orbits of the lifts (their traces $81,81,102,117$ are $\sum(27+3a_2)$ over the orbit, which is what the refuted ``trace $81$'' conjecture had noticed), and the classical congruences were checked by norms in the coefficient fields. The dictionary itself is proved exactly at level $3$ in Part~IV, where the same lifts in weight $2\omega_1$ are matched to the weight-$10$ newforms of level~$3$.
+\end{proof}
+Thus the cyclotomic part of the law is classical Eisenstein theory transported through the non-tempered lifts, exactly as $73$ and $41$ were on $\Ff$ (Section~\ref{sec:f4}); what the lifts do not explain are the Bernoulli-type primes ($7$ for $\Gt$, $691$ for $\Ff$) and the $p\mp1$ primes, which fall on tempered forms. The tempered remainders have dimensions $21$, $177$, $510$, $2265$.
+
+
+\subsection{Multiplicities and local types} The multiplicity of a joint $(T_2,T_3)$ eigen-system on the class set at Iwahori level $p$ is the dimension of the space of Iwahori-fixed vectors of the local representation at $p$ (for eigen-systems of global multiplicity one), so it records the local type of the form at the level prime. Among the rational eigen-systems we find only the multiplicities $1,2,3,6$: at $p=7$: $(-14,-48)^3,(-3,60)^3,(-3,-4)^6$; at $p=11$: $(-9,12),(5,36)$ with multiplicity $1$, $(-6,-7),(14,3)$ with $2$, $(15,56),(-6,13\pm\sqrt{37})$ with $3$; at $p=13$: $(-14,-63)$; at $p=17$: $(-18,-60),(6,36),(6,-28)$ with $1$ and $(4,-27),(9,156),(30,44)$ with $3$. The carriers of the cyclotomic Eisenstein primes $43$, $37$ and $13$ all have multiplicity $3$ and $3$ (at $p=17$) has multiplicity $1$; Theorem~\ref{thm:carriers} explains the multiplicities as the Iwahori-fixed dimensions of the local components of the Arthur-type lifts, decided by the Atkin--Lehner sign of the classical form.
+
+\subsection{Congruence numbers} The index $[\Z^X:\bigoplus_\chi(\text{saturated eigenlattice of }\chi)]$ is the discriminant of the Hecke module; its prime factorisation lists every congruence prime with a multiplicity. For $\Ff$ at level $Q_3$ it is
+\[2^{16}\cdot3^{11}\cdot5^{6}\cdot7\cdot11^{3}\cdot13\cdot17^{2}\cdot41\cdot73\cdot691,\]
+in which each Eisenstein prime appears exactly once (the Eisenstein number $E$ divides it exactly) and the cuspidal congruences of \S\ref{sec:f4} account for $17^2$ (the two-dimensional intersection), $11^3$ (two-dimensional plus one), $13$ and $7$. For the Niemeier genus it is a $240$-digit number whose odd part beyond $3$ is
+\[5^{34}\cdot7^{20}\cdot11^{10}\cdot13^{11}\cdot17^{3}\cdot19^{2}\cdot23^{2}\cdot41\cdot131\cdot283^{2}\cdot593\cdot617^{2}\cdot691^{10}\cdot3617^{4}\cdot43867^{3},\]
+containing Harder's $41$ once and the Bernoulli primes with the multiplicities of their propagation among the lifts.
+
+\section{The compact $F_4$}\label{sec:f4}
+\subsection{Level one} The compact $\Ff$ over $\Z$ is $\Aut(J_\Z)$ for the integral Albert algebra $J_\Z=\mathrm{Her}_3(\mathcal O)$, and its level-one class set has two elements \cite{Gross-Z,EG}: $J_\Z$, with $|\Aut|=4180377600=6|W(E_8)|$, and the Elkies--Gross isotope $J_E$, with $|\Aut|=634023936=3|{}^3D_4(2)|$; the mass is $691/380414361600$. Their theta series are $E_{12}\pm(\text{const}/691)\Delta$, so the level-one Hecke module is $\mathbb{C}\mathbf 1\oplus\mathbb{C}\,\Theta(\Delta)$ \cite{Shan}, and the congruence mod $691$ is Ramanujan's. We enumerated the $2$-neighbours of both lattices for the two maximal parabolics (rank-one trace-zero points of $J/2J$, $69615$ of them, in five $\Aut$-orbits of sizes $48600,14175,6075,405,360$; and $6$-dimensional null subspaces for the Heisenberg parabolic) and classified each neighbour by explicit isomorphism. The Brandt matrices at $p=2$ are
+\[T(\omega_4^\vee)(2)=\begin{pmatrix}1264320&7646400\\1159704&7751016\end{pmatrix},\qquad T(\omega_1^\vee)(2)=\begin{pmatrix}25830&113400\\17199&122031\end{pmatrix},\]
+with eigenvalues $\{8910720,\,104616\}$ and $\{139230,\,8631\}$. Both cuspidal eigenvalues agree with the Satake-parameter prediction from $\tau(2)=-24$ for the lift of $\Delta$ via $\iota:\mathrm{Sp}_6\times\mathrm{SL}_2\to\Ff$ with the principal $\mathrm{SL}_2$ (for $T(\omega_1^\vee)$: $N_2-(1+2+\dots+2^5)(1+2^{11}-\tau(2))=139230-63\cdot1971=15057$ at level $3$ below, and $8631$ at level one). The $819$ rank-one elements of $J_E$ that define its relation to the Leech lattice \cite{EG} appear as the orbit of size $360$; each has exactly $72$ standard neighbours.
+
+\subsection{Level $Q_3$} Let $Q_3$ be the parahoric at $3$ attached to $\omega_1^\vee$ (stabiliser of a $6$-dimensional null subspace of $J/3J$). The class set has $15$ elements: nine on $J_\Z$ with stabiliser orders $288$, $1296$, $1944$, $3024$, $15552$, $23328$, $72576$, $645120$, $1244160$, six on $J_E$ with $36$, $288$, $648$, $972$, $2304$, $9072$; and
+\[\sum_x\frac1{|\Gamma_x|}=\frac{2068163}{52254720}=\frac{691}{380414361600}\cdot21789040,\]
+$21789040$ being the number of $Q_3$-cosets. The matrix of $T(\omega_1^\vee)(2)$ (Appendix~\ref{app:matrix}) has row sums $139230$, is mass-weighted symmetric, and has integer spectrum
+\[139230,\quad 8631^{(5)},\quad 15057^{(2)},\quad 3087^{(2)},\quad 2331,\quad 567^{(2)},\quad 207,\quad -585.\]
+Here $E=41\cdot73\cdot691$, as \eqref{eq:mass} predicts ($41\mid3^8-1$, $73\mid3^{12}-1$, $691$ from $\zeta(-11)$, with $5$ and $7$ cancelling), and the form-level test passes at exactly these primes: $691$ on the $\Delta$-lift eigenspace, $73$ on the $15057$-eigenspace, $41$ on the $2331$-eigenspace, and at no other prime (the eigenvalue coincidences at $2161,53,31,71,19,271,13,239$ all fail the test).
+
+\subsection{The two classical lifts and the prime $73$} The theta correspondence for $\Ff\times\mathrm{PGL}_2$ \cite{Shan} lifts a newform $f$ of weight $12$ and level $3$ to eigenvalue $N_2-63\,(1+2^{11}-a_2(f))$. The space $S_{12}(\Gamma_0(3))$ has a unique newform, \textsf{3.12.a.a}, with $a_2=78$, $a_3=-3^5$; it lifts to $15057$, and $1+p^{11}-a_p(f)\equiv0\pmod{73}$ for $p=2,5,7$: the prime $73$ on $\Ff$ is the classical Eisenstein congruence of \textsf{3.12.a.a}, transported, exactly as $691$ is Ramanujan's. The remaining eigenvalues are \emph{not} such lifts: $3087,2331,567$ would need $a_2=-112,-124,-152$, outside the Ramanujan bound $2\cdot2^{11/2}$, and $207,-585$ are not of the required shape at all.
+
+\subsection{Theta-visibility} The classical theta map of the level-$Q_3$ classes (rank-one elements counted by trace) is Hecke-equivariant into $M_{12}(\Gamma_0(3))$, which has dimension $5$ and $T_2$-eigenvalues $a_2\in\{2049,-24,78\}$ for the Eisenstein space, $\Delta$ and \textsf{3.12.a.a}. By the dictionary $N_2-63(2049-a_2)$ these correspond to the eigenvalues $139230$, $8631$ and $15057$, and no others: the eigenspaces $3087,2331,567,207,-585$ lie in the kernel of the theta map. Consequently the primes $691$ and $73$ are explained by integrality of rank-one counts in the sense of Remark~\ref{rem:E}(b)---the $\Gamma_0(3)$ Eisenstein combination $(E_{12}(\tau)-3^{12}E_{12}(3\tau))/(1-3^{12})$ has denominator $691\cdot(3^{12}-1)=2^4\cdot5\cdot7\cdot13\cdot73\cdot691$---while $41$ is not: $41\mid3^8-1$, and $3^8-1$ occurs in no weight-$12$ Eisenstein denominator at level $3$. The $41$-carrier is invisible to every classical theta series of weight $12$; its explanation (Part~II \cite{PartII}) is that it is attached to a newform of weight $8$, whose Eisenstein series has $3^8-1$ in its denominator.
+
+\subsection{The remaining eigen-systems} The eigenspaces $3087^{(2)},2331,567^{(2)},207,-585$ are the subject of Part~II \cite{PartII}, where a second Hecke operator $T(\omega_4^\vee)(2)$ is computed and each eigen-system is matched, at the prime $2$, with a parameter on a smaller group: $2331$ with the parameter \textsf{3.8.a.a}$[3]$ on $\mathrm{Sp}_6$ (which explains $41$ as the Eisenstein congruence of the weight-$8$ newform of level $3$, transported), $207$ with $\textsf{3.6.a.a}\oplus[4]$ paired with $\Delta$, $3087$ and $567$ with compact $G_2$-forms of weight $2\omega_2$ and level $3$, and $-585$ with a compact $\mathrm{SO}(7)$-form of weight $(3,1,1)$ on the genus of $E_7$ whose Frobenius polynomial factors as $\textsf{3.6.a.a}$ times a stable genus-$2$ parameter. Every prime of the congruence number of \S\ref{sec:g2} is thereby explained either as a transported classical Eisenstein congruence or as a level-raising congruence at $3$.
+
+\section{The Niemeier genus}\label{sec:niem}
+Chenevier and Lannes \cite{CL} publish the Kneser neighbour counts $N(p,L_i,L_j)$ between the $24$ Niemeier lattices for $p\le31$. Assembling them into Hecke matrices $T_p$, the weights are determined by (H2) up to a scalar fixed by the Smith--Minkowski--Siegel mass; they come out integral, with $|\Aut(\text{Leech})|=|\mathrm{Co}_0|$, and $E=131\cdot283\cdot593\cdot617\cdot691^2\cdot3617\cdot43867$. Of the $23$ cuspidal $T_2$-eigenforms (all rational, \cite{NV}), exactly seven are congruent to the constant function: $691$ on the Ikeda lift of $\Delta$ ($\lambda_2=4192830$) and on two further forms; $131\cdot593$ (numerator of $B_{22}$) on $\lambda_2=2098332$; $283\cdot617$ ($B_{20}$) on $533160$; $43867$ ($B_{18}$) on $99792$; $3617$ ($B_{16}$) on $89640$. This is the set predicted by Corollary~\ref{cor:law} with nothing missing and nothing extra; Harder's prime $41$, which is a Siegel--elliptic congruence on this genus, is correctly absent. The $691$-eigenform is the Coxeter-number function $L\mapsto691\,h(L)-2730$, whose value at the Leech lattice is the denominator of $B_{12}$.
+
+\subsection{The umbral groups are the weights} The weights of the Hecke inner product factor in a way that connects the theorem to umbral moonshine \cite{CDH}. For each of the $23$ Niemeier lattices $L^X$ with root system $X$, Cheng, Duncan and Harvey define the \emph{umbral group} $G^X=\Aut(L^X)/W(X)$, the quotient by the Weyl group, and attach to $X$ a vector-valued mock modular form whose index is the Coxeter number $h(X)$ (their lambency). Dividing the automorphism orders recovered from (H2) and the mass by the Weyl group orders $\prod_i|W(X_i)|$ reproduces their table in all $23$ cases: $M_{24}$ for $A_1^{24}$, $2.M_{12}$ for $A_2^{12}$, $2.\mathrm{AGL}_3(2)$ for $A_3^8$, $\mathrm{GL}_2(5)/2$ for $A_4^6$, $3.\mathrm{Sym}_6$ for $D_4^6$, $\mathrm{GL}_2(3)$ for $E_6^4$ and $A_5^4D_4$, $\mathrm{Sym}_3$ for $E_8^3$, and so on down to the trivial group for $D_{16}E_8$ and $D_{24}$ (and $\mathrm{Co}_0$ for the Leech lattice, where $W$ is trivial). Hence
+\[\langle f,g\rangle=\sum_X\frac{f(X)\,g(X)}{|W(X)|\cdot|G^X|},\]
+and the Eisenstein number $E$, hence the seven Eisenstein primes, is computed from the Weyl groups and the umbral groups. In the same variable two of the Eisenstein eigenforms become explicit polynomials: with $h=h(X)$,
+\[v_{691}(X)=2730-691\,h,\qquad v_{131\cdot593}(X)=77683\,(7h^2-60h)+9418500,\quad 77683=131\cdot593,\]
+each congruence visible coefficient by coefficient, and each constant term---the value at the Leech lattice, $h=0$---carrying the denominator of the corresponding Bernoulli number ($2730$ for $B_{12}$; $9418500=138\cdot68250$ for $B_{22}$). The $3617$, $43867$ and $283\cdot617$ eigenforms are not polynomials in $h$, nor in $h$ together with the number and types of the components; in particular the $3617$-eigenform does not vanish at $E_8^3$, whose root system is a $7$-design, so it is not the degree-$4$ harmonic theta vector. We do not know what they are as functions of the root system.
+
+\subsection{The character map and the vertex operator algebras} The theta map $\Theta\colon f\mapsto\sum_Xf(X)\theta_X/|\Aut X|$ from functions on the genus to $M_{12}$ is Hecke-equivariant and sends the constant function to $E_{12}$ and $v_{691}$ to $\Delta$. Dividing by $\Delta$ identifies $M_{12}$ with $\mathrm{span}\{J,1\}$, $J=j-744$, which by Zhu's theorem is exactly the space of characters of strongly rational holomorphic vertex operator algebras of central charge $24$: every such $V$ has character $J+\dim V_1$, where $V_1$ is its weight-one Lie algebra. Under this map the $691$-eigenline becomes the constant direction, i.e.\ the functional $\dim V_1$, while the Eisenstein line becomes $E_{12}/\Delta=J+82104/691$, the character of no vertex operator algebra: Ramanujan's congruence, read on the VOA side, is the statement that $E_{12}$ fails to be a character and fails by $691$. For a Niemeier lattice, $\dim(V_X)_1=24(h(X)+1)$, so the Eisenstein eigenform extends to all $71$ vertex operator algebras of Schellekens' list as
+\[v(V)=3421-\tfrac{691}{24}\dim V_1,\]
+and at the Moonshine module, $V_1^\natural=0$, it takes the value $3421=2730+691$: one unit of $691$ beyond the Leech lattice vertex operator algebra, $V^\natural\equiv V_\Lambda\pmod{691}$.
+
+Höhn \cite{Hohn17}, Möller--Scheithauer \cite{MS23} and Höhn--Möller \cite{HM} show that the $70$ vertex operator algebras with $V_1\neq0$ fall into eleven families, each a simple-current extension built on a lattice from a fixed classical positive-definite genus (the Niemeier genus $II_{24,0}$; $II_{16,0}(2_{II}^{+10})$ with $17$ classes; $II_{12,0}(3^{-8})$ with $6$; and so on down to rank $4$), with the orbifold constructions realised at the lattice level by passage to index-$n$ sublattices of fixed lattices. Theorem~\ref{thm:exist} therefore applies to the vertex operator algebras family by family, with the Eisenstein primes of each family being the primes of the Siegel mass of its genus; the Niemeier family is the case treated above. The Moonshine module is the rank-zero case: its orbit lattice is the zero lattice, its family is the $38$ rank-zero generalised deep holes of $V_\Lambda$, and its ``genus'' is a single point of mass $1$, which has no prime numerator. No Eisenstein congruence reaches $V^\natural$ through this structure.
+
+\begin{remark}[Averaged holography]
+The mass-weighted average of the partition functions $\theta_X/\eta^{24}$ of the Niemeier lattice vertex operator algebras is $E_{12}/\Delta$ (Siegel--Weil); in the ``averaged holographic duality'' of Maloney--Witten and Afkhami-Jeddi--Cotler--Hartman--Maloney--Tajdini \cite{MW,AJ}, such an Eisenstein series is the partition function of a simple three-dimensional gravity theory summed over its saddles, and in Witten's proposal \cite{Witten07} the Moonshine module, with no weight-one currents, is pure gravity at $c=24$. In our data the mass-weighted average of $\dim V_1$ over the $24$ Niemeier theories is exactly $82104/691$: the ensemble-averaged chiral $c=24$ lattice theory has $118.82$ currents, is not a theory, and the denominator of its current count is Ramanujan's prime. In this language the constant function on a genus is the averaged theory, the cusp forms are the deviations of individual theories from it, and Theorem~\ref{thm:exist} says that an individual theory is congruent to the ensemble average modulo $\ell$ exactly when $\ell$ divides the numerator of the mass. We record this as a reading, not a result: congruences of partition functions modulo primes have, at present, no physical interpretation.
+\end{remark}
+
+We note what this bridge is not. Monster moonshine is the moonshine of $V^\natural$, the $\Z/2$-orbifold of the Leech lattice vertex algebra, with character $j-744$; the coefficients of $j$ carry congruences at the supersingular primes $2,\dots,13$ and at no Bernoulli prime, the character degrees of the Monster divide its order and so involve no Bernoulli prime, and the coefficients of the umbral mock modular forms are dimensions of representations of the umbral groups. Every Bernoulli-prime phenomenon in this paper lives on the lattice and Hecke side of the Leech lattice; none crosses to the group side.
+
+
+\section{The compact $E_8$, and the absent $E_6$ and $E_7$}\label{sec:e8}
+The ladder of compact groups over $\Z$ built from the octonions has fewer rungs than the exceptional series suggests. There is no compact $\Z$-form of type $E_6$: the compact real form is an outer form, so a $\Q$-group split at every finite prime and compact at infinity would need a quadratic twist trivial at every finite place and nontrivial at infinity, which does not exist; the mass formula records the same fact, since $E_6$ has the odd Weyl degrees $5$ and $9$ and $\zeta(1-5)=0$. There is no compact $\Z$-form of type $E_7$ either: the compact form is inner but not pure inner, and the two $\Z$-groups of type $E_7$ classified in \cite{GPR} (the automorphism groups of the Freudenthal triple systems over $\mathrm{Her}_3(C)$ for $C$ the split octonions and the Coxeter order) are both non-compact at infinity; the octonionic one is the Hermitian group $E_{7,3}$ studied by Pollack. So after $F_4$ the next compact rung is $E_8$.
+
+Gross \cite{Gross-Z} and Gross--Nebe \cite{GN} describe its integral structures: the unique anisotropic $E_8$ over $\Q$ is split at every prime, and its level-one class set is the set of isomorphism classes of \emph{Lie orders}---$\Z$-lattices $\mathcal L$ in the $248$-dimensional Lie algebra $\mathfrak g_\Q$, closed under the bracket, on which the Killing form divided by $2h^\vee=60$ is even, unimodular and negative definite---that are hyperspecial at every prime. One class is explicit: the Thompson--Kostrikin orthogonal decomposition of $\mathfrak e_8$ into $31$ mutually orthogonal Cartan subalgebras gives a Lie order $\mathcal L_{\mathrm{OD}}\cong\perp E_8^{31}$; the stabiliser of the decomposition in $E_8(\mathbb C)$ is Alekseevskii's group $2^{5+10}\cdot\mathrm{SL}_5(2)$, of order $327{,}659{,}028{,}480$, and it contains the Dempwolff group $2^5\cdot\mathrm{GL}_5(2)$, of order $319{,}979{,}520$. The mass is
+\[M(E_8)=2^{-8}\prod_{d\in\{2,8,12,14,18,20,24,30\}}|\zeta(1-d)|=\frac{2155741910416889170788798426985697}{154705492508859411569049600000}\approx13934.9,\]
+so the class number is at least $13935$ \cite[Prop.~5.3]{Gross-Z}; the Thompson--Kostrikin class contributes at most $3.2\cdot10^{-9}$ to the mass, and the class set is dominated by classes with tiny automorphism groups, as the Niemeier genus is dominated by its Leech end but incomparably more so. The class number is unknown.
+
+Theorem~\ref{thm:exist} (that is, Martin--Wakatsuki's theorem) nevertheless applies. Its hypotheses are the finiteness of the class set and the mass formula, both proved by Gross, and the two matrix properties (H1), (H2), which hold for every Hecke operator on every class set. Hence:
+\begin{theorem}\label{thm:e8}
+On the space of level-one algebraic modular forms of trivial weight on the compact $E_8$ over $\Z$, for each of the primes
+\[691,\quad 43867,\quad 283,\quad 617,\quad 103,\quad 2294797,\quad 1721,\quad 1001259881\]
+---the primes of the numerators of $B_{12}$, $B_{18}$, $B_{20}$, $B_{24}$, $B_{30}$---there is an integer-valued cuspidal function congruent to the constant function modulo $\ell$, an element of the cuspidal Eisenstein component congruent to a unit multiple of the constant, and a cuspidal Hecke eigenform whose eigen-system is congruent to the Eisenstein one modulo a prime above $\ell$. No other prime has this property except possibly primes dividing $\operatorname{lcm}|\Gamma_x|$.
+\end{theorem}
+The prime $3617$ (numerator of $B_{16}$) is absent because $16$ is not a Weyl degree of $E_8$; it appears on the Niemeier genus (\S\ref{sec:niem}) because $16$ is a degree of $D_{12}$.
+
+We have not attempted to enumerate this class set. The instrument that handles $G_2$ (an $8$-dimensional lattice, $63$ rank-one points modulo $2$) and $F_4$ ($27$ dimensions, $69615$ points, $15$ classes at level $Q_3$) finds isomorphisms between lattices by backtracking on rank-one elements, which works because the automorphism groups involved are large. For tens of thousands of $248$-dimensional Lie orders with automorphism groups of order $1$ or $2$ there is no such handle, and isomorphism testing at that scale is a research problem in its own right. Theorem~\ref{thm:e8} is therefore a statement about a Hecke module whose dimension is unknown, obtained from four values of the zeta function: the congruence-prime spectrum of the module is known although the module itself has never been constructed. We regard this, and the identification of the unknown carriers on $\Ff$, as the principal open experiments the paper leaves.
+
+The subgroup-theoretic relation between the Elkies--Gross lattice, the Thompson group and $E_8(\F_3)$ is recorded in Appendix~\ref{app:monster}.
+
+\section{Concluding remarks}
+Theorem~\ref{thm:exist}, due in substance to Martin and Wakatsuki \cite{MW24}, is Hida's principle---congruence primes are primes of the adjoint $L$-value---for the trivial representation, where the adjoint $L$-value is the mass; its content is that the principle holds at the level of functions on the class set, with a proof short enough to formalise. They applied it to unitary groups and to $\mathrm{SO}(5)$; our contribution is its application, with identified carriers, to the exceptional groups and the Niemeier genus. The data confirm it on three groups and eight levels and, on the Niemeier genus, against computations we did not make. The questions the data leave open are of two kinds: the automorphic identification of the $\Ff$ and $\Gt$ eigenforms, pursued in Part~II \cite{PartII}; and the Bernoulli-type and $p\mp1$ Eisenstein primes, which fall on tempered forms and are not explained by the lifts of Theorem~\ref{thm:carriers}.
+
+\appendix
+\section{The Hecke matrix at $F_4$ level $Q_3$}\label{app:matrix}
+Classes $1$--$9$ are on $J_\Z$ and $10$--$15$ on $J_E$, in the order of the stabiliser lists above. Entry $(i,j)$ counts the $\omega_1^\vee$-neighbours at $2$ of class $i$ lying in class $j$.
+{\tiny\[\left(\begin{array}{rrrrrrrrrrrrrrr}
+18270&3528&2268&1344&189&189&42&0&0&92232&10920&5040&3528&1344&336\\
+15876&7011&0&2808&0&0&135&0&0&93744&9504&5400&3024&1296&432\\
+15309&0&9279&0&567&675&0&0&0&91692&11340&3888&4212&2268&0\\
+14112&6552&0&4851&0&0&252&63&0&84672&19656&7560&0&756&756\\
+10206&0&4536&0&10521&378&0&0&189&81648&18144&0&9072&4536&0\\
+15309&0&8100&0&567&1854&0&0&0&83592&13608&7776&8424&0&0\\
+10584&7560&0&6048&0&0&1449&189&0&84672&12096&3024&0&4536&9072\\
+0&0&0&13440&0&0&1680&8064&2646&0&94080&0&0&5880&13440\\
+0&0&0&0&15120&0&0&5103&5607&0&90720&0&0&22680&0\\
+11529&2604&1698&1008&189&129&42&0&0&99945&11214&5568&3582&1386&336\\
+10920&2112&1680&1872&336&168&48&42&21&89712&21015&5280&3024&2376&624\\
+11340&2700&1296&1620&0&216&27&0&0&100224&11880&8415&864&108&540\\
+11907&2268&2106&0&567&351&0&0&0&96714&10206&1296&10413&3402&0\\
+10752&2304&2688&576&672&0&144&21&42&88704&19008&384&8064&5679&192\\
+10584&3024&0&2268&0&0&1134&189&0&84672&19656&7560&0&756&9387
+\end{array}\right)\]}
+
+\section{The Lean certificate}\label{app:lean}
+The file \texttt{Eisenstein.lean} (Lean~4 v4.34.0, Mathlib v4.34.0) proves, with no \texttt{sorry} and using only the axioms \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}:
+\begin{itemize}
+\item \texttt{mass\_criterion}: for $e,c:X\to\Z$ with $\sum e_ic_i=1$, $(\exists f,\ \sum e_if_i=0\wedge\forall i,\ \ell\mid f_i-1)\iff\ell\mid\sum e_i$;
+\item \texttt{cuspidal\_stable}: a matrix with constant row sums and $e_iT_{ij}=e_jT_{ji}$ preserves $\{f:\sum e_if_i=0\}$;
+\item \texttt{eisenstein\_component\_to\_mass}: for $\ell$ prime, $\ell\nmid c$, $f$ cuspidal with $\ell\mid f_i-c$ for all $i$, $\ell\mid\sum e_i$.
+\end{itemize}
+The two remaining steps of the proof of Theorem~\ref{thm:exist} are formalised in the file \texttt{EisensteinComponent.lean} (same toolchain; compiled by GitHub Actions, public log at \url{https://github.com/chrisyounge-create/Cayley-Agent-Repository}), again with no \texttt{sorry} and the same three axioms:
+\begin{itemize}
+\item \texttt{eisenstein\_idempotent\_step}: given a complete family of orthogonal idempotents $e_j$ of the commutative algebra $\T_{\mathcal O}$ acting on $\mathcal O^X$ (its existence for a finite algebra over a complete discrete valuation ring is the standard decomposition into local factors and is taken as a hypothesis), an eigenvector $\mathbf 1$ with character $\chi_{\Eis}:\T_{\mathcal O}\to\mathcal O$, a $\T_{\mathcal O}$-stable submodule $C$, and $f_0\in C$ with $f_0\equiv\mathbf 1\pmod{\ell}$: some $e_j$ fixes $\mathbf 1$, and $e_jf_0$ lies in $C$, in the component $e_j\mathcal O^X$, and is $\equiv\mathbf 1\pmod\ell$;
+\item \texttt{deligne\_serre\_prime} and \texttt{deligne\_serre\_lift}: for a torsion-free algebra $A$ over a domain $\mathcal O$ and a prime $\mathfrak n$ of $A$, there is a prime $P\subseteq\mathfrak n$ with $P\cap\mathcal O=0$, so that $A\to A/P$ is a ring homomorphism to a domain, injective on $\mathcal O$, reducing modulo $\mathfrak n/P$ to the given character.
+\end{itemize}
+Applied to $A=\T_{\mathcal O}/\operatorname{Ann}(C\otimes\mathcal O)$ and $\mathfrak n$ the kernel of the Eisenstein character modulo $\lambda$, this is the Deligne--Serre lemma in the form used in the proof; the finiteness of $\operatorname{Frac}(A/P)$ over $\operatorname{Frac}(\mathcal O)$, which follows from the finiteness of $A$ over $\mathcal O$, is not restated in the certificate.
+
+\section{Data and code}\label{app:data}
+All code (Python/NumPy, FLINT for exact characteristic polynomials), the class sets, Brandt matrices and characteristic polynomials for $\Gt$ at levels $7,11,13,17$ and $\Ff$ at levels $1$ and $Q_3$, the Niemeier computation and the Lean file are available from the author. The carrier of $307$ at $\Gt$ level $17$ was found from the characteristic polynomial of the $2280\times2280$ matrix $T_2$ (reconstructed from $106$ word-size primes and verified against a $107$th): the cusp polynomial's Eisenstein factor at $307$ is a Hensel-lifted square $(x-\alpha)^2$, $\alpha\in\Z_{307}$, and lattice reduction on $\alpha$ returns the quartic of Table~2, which divides the cusp polynomial exactly twice.
+
+\section{A thread to the Monster through the Thompson group}\label{app:monster}
+Section~\ref{sec:niem} found that no Bernoulli-prime phenomenon reaches the Monster. There is, however, a subgroup-theoretic thread, and it runs through both exceptional class sets at level one. The automorphism group of the Elkies--Gross lattice $J_E$ has order $634{,}023{,}936=3\,|{}^3D_4(2)|$ and contains ${}^3D_4(2)$; since the $26$-dimensional representation of ${}^3D_4(2)$ is absolutely irreducible and rational, a central element of order $3$ would act on $J_E\otimes\Q$ by a rational scalar, hence trivially, so $\Aut(J_E)\cong{}^3D_4(2){:}3=\Aut({}^3D_4(2))$, not ${}^3D_4(2)\times3$. This group is a maximal subgroup of the Thompson group $\mathrm{Th}$, the point stabiliser of its minimal permutation representation, of degree $|\mathrm{Th}|/|{}^3D_4(2){:}3|=143{,}127{,}000=2^3\cdot3^5\cdot5^3\cdot19\cdot31$ \cite{ATLAS}; and $\mathrm{Th}\cong C_{\mathbb M}(3C)/\langle3C\rangle$ is a section of the Monster. On the $E_8$ side, $\mathrm{Th}$ acts on the Thompson--Smith lattice, a $\Z$-form of $\mathfrak e_8$ whose bracket it preserves only modulo $3$, and the subgroup preserving the bracket over $\Z$ is the Dempwolff group, again a maximal subgroup of $\mathrm{Th}$ \cite{Th76}. Thus \emph{the one explicit non-split point of each exceptional class set---$J_E$ for $\Ff$, a Dempwolff-stable Lie order for $E_8$---is stabilised by a maximal subgroup of the Thompson group.}
+
+The thread is $3$-adic, and $3$ is the level prime of \S\ref{sec:f4}. The Thompson group embeds in $E_8(\F_3)$ through the $3C$-centraliser of the Monster acting on a vertex algebra over $\F_3$ containing $\mathfrak e_8\otimes\F_3$; reduction modulo $3$ embeds $\Aut(J_E)$ in $\Ff(\F_3)$ (the kernel of reduction on a finite group is trivial for $p\ge3$); and the six exotic classes at level $Q_3$ are precisely the orbits of ${}^3D_4(2){:}3$ on the $21{,}789{,}040$ points of the $\Ff(\F_3)$-flag variety, with stabilisers of orders $36,288,648,972,2304,9072$.
+It is natural to ask whether this is more than an abstract coincidence, i.e.\ whether $\Aut(J_E)$, embedded in $E_8$ through $\Ff\times G_2\subset E_8$, is a conjugate of the maximal subgroup ${}^3D_4(2){:}3$ of $\mathrm{Th}\subset E_8(\F_3)$. It is not. Under $\Ff\times G_2$ the adjoint representation is $248=(52,1)\oplus(1,14)\oplus(26,7)$, and any homomorphism ${}^3D_4(2){:}3\to G_2$ factors through the quotient of order $3$; so our copy of ${}^3D_4(2){:}3$ acts on $\mathfrak e_8$ by $\chi_{52}+(14\text{ characters of order dividing }3)+\chi_{26}\otimes(7\text{ such characters})$. The restriction of the $248$-dimensional character of $\mathrm{Th}$ to its maximal subgroup is $\chi_{52}+\chi_{196}$ (computed with the character table library of GAP), which has no such form. The comparison that matters is modulo $3$, where the characters of order $3$ become trivial and $196=14+7\cdot26$ in degree; but the Brauer characters still differ (on involutions, $24$ for ours and $-8$ for $\mathrm{Th}$'s), and the $3$-modular composition factors are $52+1^{21}+25^{7}$ for ours and $52+196$ for $\mathrm{Th}$'s. The two copies of ${}^3D_4(2){:}3$ in $E_8(\F_3)$ are therefore different: the thread to the Monster runs through isomorphism type, not through the embedding in $E_8$.
+
+\begin{thebibliography}{99}
+\bibitem{PartII} C.~Younge, The Hecke module of the compact $F_4$ at level $3$: identification of its fifteen eigen-systems and three new stable forms (Class sets and Eisenstein congruences, II), working draft, 2026.
+\bibitem{ATLAS} J.~H.~Conway, R.~T.~Curtis, S.~P.~Norton, R.~A.~Parker, R.~A.~Wilson, \emph{Atlas of Finite Groups}, Oxford, 1985.
+\bibitem{BD} J.~Bergstr\"om, N.~Dummigan, Eisenstein congruences for split reductive groups, \emph{Selecta Math.} 22 (2016), 1073--1115.
+\bibitem{BKK} T.~Berger, K.~Klosin, K.~Kramer, On higher congruences between automorphic forms, \emph{Math.\ Res.\ Lett.} 21 (2014), 71--82.
+\bibitem{CDH} M.~Cheng, J.~Duncan, J.~Harvey, Umbral moonshine and the Niemeier lattices, \emph{Res.\ Math.\ Sci.} 1 (2014), Art.\ 3; arXiv:1307.5793.
+\bibitem{CL} G.~Chenevier, J.~Lannes, \emph{Automorphic forms and even unimodular lattices}, Ergeb.\ Math.\ Grenzgeb.\ 69, Springer, 2019; neighbour tables at \url{http://gaetan.chenevier.perso.math.cnrs.fr/niemeier/niemeier.html}.
+\bibitem{DS} P.~Deligne, J-P.~Serre, Formes modulaires de poids 1, \emph{Ann.\ Sci.\ ENS} 7 (1974), 507--530.
+\bibitem{EG} N.~Elkies, B.~Gross, The exceptional cone and the Leech lattice, \emph{IMRN} 1996, 665--698.
+\bibitem{GPR} S.~Garibaldi, H.~Petersson, M.~Racine, Albert algebras over $\Z$ and other rings, \emph{Forum Math.\ Sigma} 11 (2023).
+\bibitem{Gross-Z} B.~Gross, Groups over $\Z$, \emph{Invent.\ Math.} 124 (1996), 263--279.
+\bibitem{GN} B.~Gross, G.~Nebe, Globally maximal arithmetic groups, \emph{J.\ Algebra} 280 (2004), 375--398.
+\bibitem{Gross-AMF} B.~Gross, Algebraic modular forms, \emph{Israel J.\ Math.} 113 (1999), 61--93.
+\bibitem{Hohn17} G.~H\"ohn, On the genus of the moonshine module, arXiv:1708.05990.
+\bibitem{HM} G.~H\"ohn, S.~M\"oller, Systematic orbifold constructions of Schellekens' vertex operator algebras from Niemeier lattices, \emph{J.\ London Math.\ Soc.}, to appear; arXiv:2010.00849.
+\bibitem{LP} J.~Lansky, D.~Pollack, Hecke algebras and automorphic forms, \emph{Compositio Math.} 130 (2002), 21--48.
+\bibitem{MS23} S.~M\"oller, N.~Scheithauer, Dimension formulae and generalised deep holes of the Leech lattice vertex operator algebra, \emph{Ann.\ of Math.} 197 (2023), 221--288.
+\bibitem{MW} A.~Maloney, E.~Witten, Averaging over Narain moduli space, \emph{JHEP} 10 (2020) 187.
+\bibitem{AJ} N.~Afkhami-Jeddi, J.~Cotler, T.~Hartman, A.~Maloney, A.~Tajdini, Free partition functions and an averaged holographic duality, \emph{JHEP} 01 (2021) 130.
+\bibitem{Th76} J.~G.~Thompson, A conjugacy theorem for $E_8$, \emph{J.\ Algebra} 38 (1976), 525--530; P.~E.~Smith, A simple subgroup of $M?$ and $E_8(3)$, \emph{Bull.\ London Math.\ Soc.} 8 (1976), 161--165.
+\bibitem{Witten07} E.~Witten, Three-dimensional gravity revisited, arXiv:0706.3359.
+\bibitem{Mar17} K.~Martin, The Jacquet--Langlands correspondence, Eisenstein congruences, and integral $L$-values in weight 2, \emph{Math.\ Res.\ Lett.} 24 (2017), 1775--1795.
+\bibitem{MW24} K.~Martin, S.~Wakatsuki, Mass formulas and Eisenstein congruences in higher rank, \emph{J.\ Number Theory} 257 (2024), 249--272.
+\bibitem{Mazur} B.~Mazur, Modular curves and the Eisenstein ideal, \emph{Publ.\ Math.\ IHES} 47 (1977), 33--186.
+\bibitem{NV} G.~Nebe, B.~Venkov, On Siegel modular forms of weight 12, \emph{J.\ reine angew.\ Math.} 531 (2001), 49--60.
+\bibitem{Pollack-theta} A.~Pollack, Exceptional theta functions and arithmeticity of modular forms on $G_2$, preprint.
+\bibitem{Shan} Y.~Shan, Level one algebraic modular forms on anisotropic $F_4$ and their applications, preprint.
+\end{thebibliography}
+\end{document}

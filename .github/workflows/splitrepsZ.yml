@@ -1,0 +1,27 @@
+name: Part III J_Z split with representatives (doubled keys)
+on:
+  workflow_dispatch:
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        g: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy sympy cypari2
+      - name: split
+        working-directory: f4p5
+        continue-on-error: true
+        run: |
+          FP=$(python3 -c "import json; print(json.dumps(json.load(open('split_groups_Z.json'))[${{ matrix.g }}]))")
+          timeout 20000 python3 orbit_split_reps.py doubled_samples.jsonl "$FP" 100000 19500
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: splitrepsZ-${{ matrix.g }}
+          path: f4p5/splitreps_*.json

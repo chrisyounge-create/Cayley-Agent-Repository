@@ -36,9 +36,10 @@ for r in mine:
         if vb is None: continue
         Lam4 = NB.neighbour(vb); M16 = to_amb16(transport(S, Lam4)); b = setup_amb(M16, to_amb16(Lam4)); n += 1
         hit = next((idx for idx in byinv.get(b['inv'], []) if same_orbit_amb(rep_setup(idx), b)), None)
-        if hit is None: counts['unidentified'] += 1; unid.append({'inv': list(b['inv']), 'M16': M16.tolist()}) if len(unid) < 20 else None
+        if hit is None: counts['unidentified'] += 1; unid.append({'inv': list(b['inv']), 'M16': M16.tolist(), 'J16': to_amb16(Lam4).tolist()}) if len(unid) < 20 else None
         else: counts[hit] += 1
     out.append({'class': r['id'], 'side': SIDE, 'n': n, 'counts': {str(k): v for k, v in counts.items()}, 'unidentified_examples': unid})
+    json.dump(out, open(f'opsample_{SIDE}_{j}.json', 'w'))                                   # incremental: nothing is lost at a time cap
     print(f"class {r['id']}: {n} neighbours, {len(counts)} distinct targets, unidentified {counts['unidentified']}  [{time.time()-t0:.0f}s]", flush=True)
     if time.time() - t0 > budget: break
-json.dump(out, open(f'opsample_{SIDE}_{j}.json', 'w')); print("done")
+print("done")

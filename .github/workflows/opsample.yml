@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        job: [Z0,Z1,Z2,Z3,E0,E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,E11,E12,E13,E14,E15]
+        job: [Z0,Z1,Z2,Z3,Z4,Z5,Z6,Z7,E0,E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,E11,E12,E13,E14,E15,E16,E17,E18,E19]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -23,7 +23,7 @@ jobs:
         continue-on-error: true
         run: |
           SIDE=${{ matrix.job }}; SIDE=${SIDE:0:1}; J=${{ matrix.job }}; J=${J:1}
-          NJ=4; if [ "$SIDE" = "E" ]; then NJ=16; fi
+          NJ=8; if [ "$SIDE" = "E" ]; then NJ=20; fi
           timeout 20500 python3 opsample.py $SIDE $J $NJ ${{ github.event.inputs.quota }} 19000 $((RANDOM + J))
       - uses: actions/upload-artifact@v4
         if: always()

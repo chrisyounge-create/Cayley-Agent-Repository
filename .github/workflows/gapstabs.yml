@@ -1,0 +1,21 @@
+name: Part III J_Z large stabilisers (GAP)
+on:
+  workflow_dispatch:
+jobs:
+  gap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -q && sudo apt-get install -y -q gap
+      - name: run
+        working-directory: f4p5
+        run: |
+          sed 's#/home/claude/autJZ.g#autJZ.g#' stab_big.g > sb.g; sed 's#/home/claude/autJZ.g#autJZ.g#' stab_new.g > sn.g
+          (timeout 10000 gap -q -b sb.g > gap_big.out 2>&1 || true); (timeout 8000 gap -q -b sn.g > gap_new.out 2>&1 || true)
+          tail -30 gap_big.out; tail -10 gap_new.out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gapstabs
+          path: f4p5/gap_*.out

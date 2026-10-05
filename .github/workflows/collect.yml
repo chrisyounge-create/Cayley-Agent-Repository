@@ -1,4 +1,4 @@
-name: Collect Part III artifacts into the data branch
+name: Collect Part III artifacts into the repository
 on:
   workflow_dispatch:
 permissions:
@@ -9,21 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: download all Part III artifacts
+      - name: download artifacts of the Part III runs
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p data/partIII
-          for RID in 37096679842 37174747771 37203982956 37204042834 $(gh run list --workflow=orbitsplitE2.yml --json databaseId --jq '.[0].databaseId') $(gh run list --workflow=huntE.yml --json databaseId --jq '.[0].databaseId'); do
-            gh run download $RID -D data/partIII/run_$RID || true
+          mkdir -p results
+          for RID in 37096679842 37174747771 37203982956 37216110242 37216164333; do
+            gh run download $RID -D results/$RID || echo "run $RID: nothing downloaded"
           done
-          find data/partIII -type f | wc -l
-          du -sh data/partIII
-      - name: push to the data branch
+          find results -type f | head -50
+          du -sh results
+      - name: commit
         run: |
           git config user.name "collector"; git config user.email "collector@users.noreply.github.com"
-          git checkout --orphan data
-          git rm -rf --cached . >/dev/null 2>&1 || true
-          git add -f data
-          git commit -m "Part III artifacts (records, splits, hunt)" -q
-          git push -f origin data
+          git add results && git commit -m "Collected Part III artifacts (pathBE runs, splits, hunt)" && git push

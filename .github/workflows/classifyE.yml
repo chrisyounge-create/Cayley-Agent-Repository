@@ -1,9 +1,6 @@
-name: Part III J_E classify hunt candidates
+name: Part III J_E classify hunt candidates (new fingerprints, exact stabilisers)
 on:
   workflow_dispatch:
-permissions:
-  contents: read
-  actions: read
 jobs:
   classify:
     runs-on: ubuntu-latest
@@ -11,26 +8,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        j: [0,1,2,3,4,5,6,7,8,9]
+        j: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install numpy sympy cypari2
-      - name: fetch hunt artifacts
-        env:
-          GH_TOKEN: ${{ github.token }}
-        working-directory: f4p5
-        run: |
-          RID=$(gh run list --workflow=huntE.yml --status=success --json databaseId --jq '.[0].databaseId')
-          gh run download $RID -D hunt
-          find hunt -name 'fixE_*.json' | wc -l
       - name: classify
         working-directory: f4p5
         continue-on-error: true
-        run: timeout 20500 python3 classify_hunt_E.py ${{ matrix.j }} 10 19800 classE_${{ matrix.j }}.json
+        run: timeout 20500 python3 classify_hunt_E.py ${{ matrix.j }} 20 19500
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: classifyE-${{ matrix.j }}
-          path: f4p5/classE_*.json
+          name: huntclassE-${{ matrix.j }}
+          path: f4p5/huntclass_*.json

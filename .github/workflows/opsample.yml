@@ -1,0 +1,32 @@
+name: Part III level-5 operator sampler (T(w1v)(2), Path B)
+on:
+  workflow_dispatch:
+    inputs:
+      quota:
+        description: neighbours per class
+        default: "150"
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        job: [Z0,Z1,Z2,Z3,E0,E1,E2,E3,E4,E5,E6,E7,E8,E9,E10,E11,E12,E13,E14,E15]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy sympy cypari2
+      - name: sample
+        working-directory: f4p5
+        continue-on-error: true
+        run: |
+          SIDE=${{ matrix.job }}; SIDE=${SIDE:0:1}; J=${{ matrix.job }}; J=${J:1}
+          NJ=4; if [ "$SIDE" = "E" ]; then NJ=16; fi
+          timeout 20500 python3 opsample.py $SIDE $J $NJ ${{ github.event.inputs.quota }} 19000 $((RANDOM + J))
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: opsample-${{ matrix.job }}
+          path: f4p5/opsample_*.json

@@ -1,0 +1,27 @@
+name: Part III J_E split with representatives (E3, one key per job)
+on:
+  workflow_dispatch:
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        g: [0,1,2,3,4,5,6,7,8,9,10]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy sympy cypari2
+      - name: split
+        working-directory: f4p5
+        continue-on-error: true
+        run: |
+          FP=$(python3 -c "import json; print(json.dumps(json.load(open('split_groups_E3.json'))[${{ matrix.g }}]))")
+          timeout 20000 python3 orbit_split_reps_E.py multi_samples_E3.jsonl "$FP" 200 19500
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: splitrepsE3-${{ matrix.g }}
+          path: f4p5/splitreps_*.json

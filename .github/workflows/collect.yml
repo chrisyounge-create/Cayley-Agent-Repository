@@ -14,7 +14,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p results
-          for RID in 37274981665 37262388555 37275661392 37275621745; do
+          for RID in 37386453034; do
             gh run download $RID -D results/$RID || echo "run $RID: nothing downloaded"
           done
           find results -type f | head -50

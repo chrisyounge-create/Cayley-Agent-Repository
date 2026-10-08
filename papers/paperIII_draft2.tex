@@ -1,0 +1,60 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}\usepackage{amsmath,amssymb,amsthm,booktabs,array}
+\newtheorem{theorem}{Theorem}[section]\newtheorem{lemma}[theorem]{Lemma}\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}\newtheorem{computation}[theorem]{Computation}\newtheorem{remark}[theorem]{Remark}\newtheorem{prediction}[theorem]{Prediction}
+\newcommand{\Z}{\mathbb Z}\newcommand{\Q}{\mathbb Q}\newcommand{\F}{\mathbb F}\newcommand{\Ff}{F_4}\newcommand{\Aut}{\mathrm{Aut}}\newcommand{\Stab}{\mathrm{Stab}}
+\title{Class sets and Eisenstein congruences on compact exceptional groups\\ III. The compact $\Ff$ at level $5$}
+\author{Christopher Younge}
+\date{5 October 2026 --- working draft 2, not for circulation}
+\begin{document}\maketitle
+\begin{abstract}
+We determine the class set of the compact $\Ff$ at the parahoric level attached to the prime $5$ (the stabiliser of a sharp-null six-space in $J/5J$): it has $259$ classes, $54$ over the Albert lattice $J_\Z$ and $205$ over the exotic lattice $J_E$, found by uniform and fixed-point sampling of six-spaces with exact stabilisers and exact isomorphism tests, and certified complete by the mass formula, which is met exactly on both halves, together with the independent identity $\sum n_Z/|\Stab|=713/18$. The Eisenstein primes of this level are therefore $7,13,31,313,601$ (and $691$ through $\Theta(\Delta)$). We compute exactly the Iwahori--Hecke generator $T_s$ at $5$ on these classes (row sums $5$, mass-symmetric, satisfying $(T_s-5)(T_s+1)=0$, spectrum $5^{93}(-1)^{154}$ on the computed part), which bounds the class number of the other maximal parahoric by $93\le h'\le104$; we prove the lemma that pair-equivalence is stronger than equivalence of intersection lattices; and we record the eigenvalues predicted for the lifts of the classical newforms of level $5$ by the dictionaries of Part~II, with the primes each is predicted to carry.
+\end{abstract}
+
+\section{The level and the main theorem}
+Let $J=J_\Z$ be the integral Albert algebra of Part~II and $J_E$ the second class of its genus, $|\Aut(J_\Z)|=4{,}180{,}377{,}600$, $|\Aut(J_E)|=634{,}023{,}936$. A six-dimensional subspace $S\subset J/5J$ on which the sharp map vanishes (a \emph{sharp-null six-space}) determines the lattice $\Lambda_S=G_0(S)+5J$, with $G_0(S)$ the $21$-dimensional space of elements whose cross product with $S$ vanishes; the stabiliser of $\Lambda_S$ in $\Ff(\Q_5)$ is a parahoric subgroup $Q_5$, and the class set of the compact $\Ff$ at level $Q_5$ is the set of pairs $(J',S)$, $J'$ in the genus of $J$, modulo $\Ff(\Q)$, i.e.
+\[\Ff(\Q)\backslash\Ff(\mathbb A_f)/K\;=\;\Aut(J_\Z)\backslash\{S\subset J_\Z/5J_\Z\}\;\sqcup\;\Aut(J_E)\backslash\{S\subset J_E/5J_E\},\]
+with $38{,}208{,}007{,}656$ six-spaces on each side. The mass formula gives $\sum_{J'}\sum_S 1/|\Stab(S)|=75809539/8294400$ on the $J_\Z$ side (Part~II) and $5831503/96768$ on the $J_E$ side; a second identity counts, for each $S$, the number $n_Z(S)$ of its five $5$-neighbours isomorphic to $J_\Z$: $\sum n_Z/|\Stab|=713/18$ on the $J_E$ side. Both identities are exact rational numbers, so a list of pairwise distinct orbits whose masses sum to them contains every orbit.
+
+\begin{theorem}\label{thm:classset}
+The class set of the compact $\Ff$ at level $Q_5$ has $259$ classes: $54$ over $J_\Z$ (Part~II) and $205$ over $J_E$. The $205$ orbits of $\Aut(J_E)$ on sharp-null six-spaces of $J_E/5J_E$ have stabiliser orders distributed as in Table~\ref{tab:stabs}; their masses sum to exactly $5831503/96768$ and $\sum n_Z/|\Stab|=713/18$ exactly. Consequently the Eisenstein primes of this level (the primes of the numerator of the mass, $2^7\cdot3^6\cdot7^2\cdot13^2\cdot31^2\cdot313\cdot601$ times the Bernoulli factor) are $2,3,7,13,31,313,601$ and $691$.
+\end{theorem}
+
+\begin{table}[h]\centering\small
+\begin{tabular}{l*{10}{r}}\toprule
+$|\Stab|$ & 1&2&4&6&8&12&16&18&24&32\\ orbits ($J_E$) & 11&66&24&39&13&11&5&1&14&4\\\midrule
+$|\Stab|$ & 54&64&96&108&168&192&336&1536&6048& \\ orbits ($J_E$) & 1&2&6&1&1&2&2&1&1& \\\bottomrule
+\end{tabular}
+\caption{Stabiliser orders of the $205$ orbits over $J_E$. The $J_\Z$ side: $8,14,4,1,7,4,1,1$ orbits with stabilisers $2,4,6,8,12,24,36,48$, the twelve large orbits $96,120,128,192^3,1152,2880,3072^2,5184,9600$, and the rare orbit $110{,}592$.}\label{tab:stabs}
+\end{table}
+
+\section{Method: finding $205$ orbits}
+\emph{Sampling and fingerprints.} Uniformly random sharp-null six-spaces (two runs, $41{,}963$ in all) were reduced to the invariants of the intersection lattice $M=\Lambda_S$ (counts of vectors of norm $\le4$), its stabiliser $|\Stab(S)|$ (the Jordan automorphisms among the automorphisms of $M$, by the exact test of Part~II), and the types and stabilisers of the five lifts. This gives $110$ keys, but keys are coarser than orbits: $24$ invariant vectors are shared by orbits of different stabilisers, and many keys contain several orbits with the same stabiliser.
+
+\emph{Exact splits.} For every key, the samples were clustered by the exact isomorphism test ($\mathrm{qfisom}$ on the intersection lattices followed by the Jordan test on the resulting isometry), $300$ samples per key in two runs (by invariant, then by invariant and stabiliser), and a third run for eleven keys whose automorphism closures made the first runs time out. The hit rate per orbit, $702\pm70$ samples per unit of $|\Stab|$, is uniform enough that every key's orbit count is pinned; the top key alone holds ten orbits of stabiliser $2$.
+
+\emph{The rare orbits.} The residual mass after the splits was $367/96768<1/192$, so the missing orbits have stabilisers in the hundreds or thousands. Fixed-point sampling (six-spaces invariant under representatives of the $49$ conjugacy classes of $\Aut(J_E)$, $298{,}075$ candidates with enlarged symmetry) produced exactly three new invariant vectors, with stabilisers $6048$ and $1536$ computed and the third too large for the closure; since $1/336+1/1536+1/6048=367/96768$ exactly, the third has stabiliser $336$ and the list is complete.
+
+\section{The operator $T_s$ at $5$: an exact Hecke operator at level $Q_5$}
+The level-$5$ structure $(J,\Lambda_S)$ is an edge of the Bruhat--Tits building of $\Ff(\Q_5)$, between the hyperspecial vertex $J$ and the vertex $\Lambda_S$ of the other type, so $Q_5$ is an Iwahori-type subgroup and the parahoric Hecke algebra contains the generator $T_s$ of the reflection through $\Lambda_S$: $T_sf(J,S)=\sum_{i=1}^{5}f(J_i,S_i)$, the sum over the five other Albert lattices $J_i\supset\Lambda_S$ (the five lifts of $S$), each with the six-space $S_i=\Lambda_S/5J_i$. Since the double coset has $q=5$ elements, $(T_s-5)(T_s+1)=0$, and the $5$-eigenspace is the space of functions pulled back from the $\Lambda$-vertex level, of dimension the class number $h'$ of that maximal parahoric.
+\begin{lemma}\label{lem:pair}
+Two pairs $(J,S)$, $(J',S')$ are in the same class if and only if some $\Ff(\Q)$-isometry carries $\Lambda_S$ onto $\Lambda_{S'}$ \emph{and} $J$ onto $J'$. Equivalence of the lattices $\Lambda_S$ alone is strictly weaker: the five lifts of $S$ have the same $\Lambda_S$ and are in general different classes.
+\end{lemma}
+This is exactly what the computation of $T_s$ needs: for each class, the five lifts share the representative's intersection lattice, so each lift is identified among the representatives of the same fingerprint by an isometry test (in common ambient coordinates scaled by $80$, since the lifts lie in $\tfrac15J$) that is required to map the Albert lattice itself; $1{,}295$ exact identifications in all.
+\begin{theorem}\label{thm:Ts}
+On $247$ of the $258$ classes with representatives (all but eleven large-stabiliser classes over $J_\Z$, which form a closed block), $T_s$ was computed exactly, with every row sum $5$, the mass symmetry $T_{ij}/|\Stab_j|=T_{ji}/|\Stab_i|$ holding on all $55{,}696$ ordered pairs, and $(T_s-5)(T_s+1)=0$ holding on every fully determined row. Its spectrum there is $5$ with multiplicity $93$ and $-1$ with multiplicity $154$. Hence $93\le h'\le 104$.
+\end{theorem}
+\begin{remark}
+A sampled estimate of $T(\omega_1^\vee)(2)$ was also built and is void (Correction~22 in the working notes): the neighbour routine reused from Part~II produces the $\omega_4^\vee$-neighbours, its random Hensel lifting is biased by neighbour type, and, structurally, any feasible sampling quota leaves a noise matrix of spectral norm above every lift eigenvalue. Cheap complete invariants of the orbits do not exist in the obvious form (vector counts to norm $6$ separate no more orbits than norm $4$), so the exact $T(\omega_1^\vee)(2)$, $36$ million exact identifications, remains out of reach; the predictions of the next section stand untested.
+\end{remark}
+
+\section{Predictions}
+The dictionaries of Part~II, re-anchored on $15057$, $2331$ and $207$ at level $3$, predict the eigenvalues of $T(\omega_1^\vee)(2)$ on the lifts of the classical newforms of level $5$, and the classical Eisenstein congruences of those newforms (verified in their coefficient fields at $q\le13$) predict which Eisenstein primes they carry.
+\begin{prediction}\label{pred}
+The spectrum of $T(\omega_1^\vee)(2)$ at level $Q_5$ contains $139230$ (Eisenstein), $8631$ ($\Theta(\Delta)$, carrying $691$), $14157.94$ and $4868.06$ (the $\Ff\times\mathrm{PGL}_2$ lifts of the quadratic pair of weight-$12$ newforms of level $5$, carrying $601$), $12285$ (the lift of the rational weight-$12$ newform, $a_2=34$, carrying $31$), $6668.08$ and $1297.92$ (the $\mathrm{Sp}_6\times\mathrm{SL}_2$ lifts of the quadratic pair of weight-$8$ newforms, carrying $313$), $1935$ (the $207$-type lift of the weight-$6$ newform, $a_2=2$, carrying $31$) and $91$ (the $\mathrm{Sp}_6\times\mathrm{SL}_2$ lift of the rational weight-$8$ newform, $a_2=-14$, carrying $13$). The prime $7$ has no classical source in weights $6$, $8$, $12$ and is predicted to fall on a stable form or a $G_2$-lift.
+\end{prediction}
+The sampled operator (in progress) tests this list; a confirmation would extend the carriers theorem of Part~I to a fourth independent level, with the ``exceptional'' primes ($7$ here, as $p\mp1$ on $G_2$) again on forms with no classical origin.
+
+\section*{Data and code}
+GitHub \texttt{chrisyounge-create/Cayley-Agent-Repository}: \texttt{f4p5/} (\texttt{pathB\_E.py}, \texttt{orbit\_split\_reps\_E.py}, \texttt{fixsample\_E.py}, \texttt{classify\_hunt\_E.py}, \texttt{reps\_ambient.json}, \texttt{nbr\_sampler.py}, \texttt{identify.py}, \texttt{opsample.py}, \texttt{assemble\_operator.py}); all runs as GitHub workflows with artifacts collected into \texttt{results/}.
+\end{document}

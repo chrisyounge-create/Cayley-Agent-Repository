@@ -16,11 +16,11 @@ def jordan_ok_scaled(As, s):
             x = E27[i] + E27[j]
             if not np.array_equal(SH(x @ As), s * (SH(x) @ As)): return False
     return True
-def setup_amb(B16, J16=None):
-    """B16 = 16 * basis rows of an ambient lattice (integer)."""
-    B4 = np.array(B16, dtype=np.int64); G = (B4 @ GRAMZ @ B4.T) // 256
+def setup_amb(B16, J16=None, scale=16):
+    """B16 = scale * basis rows of an ambient lattice (integer)."""
+    B4 = np.array(B16, dtype=np.int64); G = (B4 @ GRAMZ @ B4.T) // (scale * scale)
     T = P.pari.qflllgram(P.gp_mat(G)); U = np.array([[int(T[i, j]) for j in range(27)] for i in range(27)], dtype=np.int64).T   # rows transform
-    B4 = U @ B4; G = (B4 @ GRAMZ @ B4.T) // 256
+    B4 = U @ B4; G = (B4 @ GRAMZ @ B4.T) // (scale * scale)
     res = P.pari.qfauto(P.gp_mat(G)); OM = [np.array(g, dtype=np.int64).T for g in P.closure([P.np_mat(g) for g in res[1]])]
     Bs = sympy.Matrix(B4.tolist()); D = int(Bs.det())
     return dict(B4=B4, G=G, OM=OM, Badj=np.array((Bs.inv() * D).tolist(), dtype=object), D=D, inv=tuple(int(x) for x in P.pari.qfrep(P.gp_mat(G), 4, 1)), J16=(None if J16 is None else np.array(J16, dtype=np.int64)))
@@ -34,7 +34,7 @@ def same_orbit_amb(a, b):
         fr = [Fraction(int(z), a['D']) for z in AD.flatten()]
         d = 1
         for q in fr: d = lcm(d, q.denominator)
-        if d > 64: continue
+        if d > 2000: continue
         As = np.array([int(q * d) for q in fr], dtype=np.int64).reshape(27, 27)
         if not jordan_ok_scaled(As, d): continue
         if a['J16'] is None or b['J16'] is None: return True

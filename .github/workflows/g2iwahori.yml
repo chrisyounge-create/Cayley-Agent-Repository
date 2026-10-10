@@ -1,0 +1,29 @@
+name: G2 Iwahori class set and Hecke operators at level p
+on:
+  workflow_dispatch:
+    inputs:
+      p:
+        description: prime level
+        default: "19"
+      q:
+        description: Hecke primes (comma separated; maps exist for 2, 5, 7)
+        default: "2"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy
+      - name: compute
+        working-directory: g2table
+        run: timeout 20500 python3 g2_iwahori.py ${{ github.event.inputs.p }} ${{ github.event.inputs.q }} 2>&1 | tee g2_iwahori_${{ github.event.inputs.p }}.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g2iwahori-${{ github.event.inputs.p }}
+          path: |
+            g2table/g2_iwahori_*.pkl
+            g2table/g2_iwahori_*.log

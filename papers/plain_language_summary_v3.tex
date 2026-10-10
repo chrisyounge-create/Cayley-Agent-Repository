@@ -1,0 +1,115 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}\usepackage{booktabs,xcolor,hyperref,enumitem,titlesec,parskip}
+
+\hypersetup{colorlinks,linkcolor=blue!40!black,urlcolor=blue!40!black}
+\titleformat{\section}{\Large\bfseries}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries}{}{0em}{}
+\newcommand{\infobox}[1]{\begin{center}\fcolorbox{black!30}{black!4}{\parbox{0.94\textwidth}{#1}}\end{center}}
+\title{\textbf{The Octonion Program}\\[4pt]\large A plain-language account of what we did, what we found,\\ what it is worth, and where it could lead}
+\author{Christopher Younge, with Claude (Anthropic)}
+\date{October 2026}
+\begin{document}
+\maketitle
+\begin{center}\small Written for a reader with no mathematical background. Every claim here is stated at the confidence we actually have; the places where we were wrong are recorded, because they are part of the method.\end{center}
+
+\section{What the program is}
+Since early September 2026 we have run a research program, in sessions, on a corner of pure mathematics where the \textbf{octonions} live. The octonions are the last of four number systems that grow out of the ordinary numbers: the reals (a line), the complex numbers (a plane, which transformed physics and engineering), the quaternions (four dimensions, which run every 3D rotation in your phone), and the octonions (eight dimensions). Each step loses a familiar property; the octonions even lose the rule that $(ab)c = a(bc)$. After them the staircase continues to the sedenions (sixteen dimensions), which lose the last property that makes a number system: nonzero things can multiply to zero. As number systems the staircase ends at the octonions, and the program's first conviction, stated in our compass note, is that they are a fundamental rung whose consequences have not been fully explored. Its second conviction, added in October, is that the sedenions belong in the picture too (Front~10).
+
+The octonions have a small family of ``symmetry groups'' attached to them, the \textbf{exceptional groups}, with the names $G_2$, $F_4$, $E_6$, $E_7$, $E_8$. Everything below is about counting and comparing certain objects that these groups govern. Two things made the program possible: an AI collaborator that can write and run large computations and check its own work against the literature, and the discipline of never trusting a result until an independent computation agrees with it.
+
+\section{The objects, in pictures}
+\infobox{\textbf{Lattices.} Picture a crystal: a regular grid of points in space. Mathematicians study grids in many dimensions. The grids in this program live in 8, 27 or 248 dimensions, one for each exceptional group, and the octonions are the material they are built from.}
+
+\infobox{\textbf{Class sets.} For a given group and a given ``level'' (a prime number that fixes how fine the grid is allowed to be), there are only finitely many essentially different grids. That finite list is the \textbf{class set}. Listing it is hard: for $G_2$ at level 17 there are 2,280 grids; for $F_4$ at level 3 there are 15; for $E_8$ nobody knows the number, only that it exceeds 13,935.}
+
+\infobox{\textbf{Hecke operators.} Each grid has ``neighbours'', grids that agree with it almost everywhere. Counting how many neighbours of grid $A$ look like grid $B$ gives a table of whole numbers. The table is called a Hecke operator, and its characteristic numbers (eigenvalues) are the program's raw data. One of them is always trivial, the row total; the others are the interesting ``tunes'' the grids can play.}
+
+\infobox{\textbf{Congruences.} Two tunes are \textbf{congruent modulo a prime} $\ell$ if they agree whenever you look at them ``through the lens of $\ell$'', keeping only remainders on division by $\ell$. The oldest example is Ramanujan's: a famous tune agrees with the trivial one modulo the prime 691. Such coincidences are never accidents; they are the visible trace of hidden structure, and they have driven number theory for a century.}
+
+\section{What we did, front by front}
+
+\subsection{Front 1: the law, the theorem, and who owns it}
+The first discovery, in mid-September, was a rule we called \emph{the law}: a tune on one of these grids can agree with the trivial tune modulo $\ell$ only if $\ell$ divides a specific number, the \emph{mass}, that is computed from the values of the zeta function at negative integers, i.e.\ from Bernoulli numbers. We tested it on every class set we could build, and it never failed. We then proved it, in one page, and machine-checked the elementary core in the proof assistant Lean~4.
+
+Then came the program's most important correction. A literature search found that Kimball Martin and Satoshi Wakatsuki had proved essentially this theorem in 2024, extending Martin's 2017 work. We rewrote everything to credit them. Our contribution is not the theorem but its use: the exact form on the finite class set, the Lean certificate, and the application to the exceptional groups, where it had never been tried. That correction is recorded as number 14 of twenty; the corrections are as much a product of the program as the results.
+
+\subsection{Front 2: the compact $G_2$ at levels up to 17, and the rule for the carriers}
+Using the octonions directly, we built the class sets of $G_2$ at levels 7, 11, 13 and 17 (2,280 grids at the last, three of the four counts new) and computed their Hecke tables. The law predicted which primes would appear at each level, including subtle cancellations, and every prediction was exact. For two weeks we believed that no simple rule governed \emph{which} tune carries each prime: three natural guesses were each refuted at the next level. That belief was wrong (Correction 21). Every classical modular form of weight six and the same level reappears inside the $G_2$ class set as a ``lift'', a tune built from it, and a one-line identity shows that such a lift is congruent to the constant tune exactly when the classical form is congruent to the classical Eisenstein series. Every cyclotomic carrier at all four levels is such a lift, and the two kinds of cyclotomic prime go to the two possible multiplicities (3 or 2) according to a sign of the classical form. The three refuted guesses were explained in passing. What the lifts cannot reach are the primes dividing $p\mp1$, which sit on tunes with no classical origin at all, and those are the genuinely exceptional congruences. We also found, at level 17, four tunes that are ``endoscopic'': built from a weight-six form and the elliptic curve of conductor 17 together, present exactly when the signs of the two agree. The whole picture is being put to a blind test: the carriers at level 19 were predicted on 8 October from the classical forms alone, and the class set at 19 (rebuilt code, validated on 7, 11, 13) is being computed to check them.
+
+\subsection{Front 3: the compact $F_4$ and its fifteen tunes}
+$F_4$ acts on 27-dimensional grids called Albert lattices. At level one there are two; at level 3 we found fifteen. We computed two commuting Hecke tables on them, the second by nine explicit isomorphisms and an argument that forced the remaining block. The tables have eight distinct tunes, and the program's central achievement is that \textbf{every one of the fifteen dimensions is matched with an object on a smaller group}, each match confirmed by at least two independent computations:
+\begin{itemize}[nosep]
+\item three are ``lifts'' of classical modular forms, the century-old objects of Ramanujan's world, and they explain the primes 691, 73 and 41 as classical coincidences transported to $F_4$;
+\item one is a lift of a classical form paired with Ramanujan's, which explains a coincidence modulo 13;
+\item two come from \textbf{new forms on $G_2$}, in a weight (``2$\omega_2$'') nobody had computed; we built them on $G_2$ and checked them with both of $G_2$'s Hecke operators, and this month also at the prime 5;
+\item one comes from a form on the 7-dimensional group $SO(7)$, living on the famous $E_7$ lattice, which we found only after \emph{predicting} all three of its Hecke numbers from the $F_4$ data. Its structure factors as a classical form times a \textbf{new stable genus-2 object} whose defining number, $-12$, was predicted before it was found.
+\end{itemize}
+Three of these objects are ``stable'', meaning they are not assembled from smaller pieces in any of the expected ways. Stable objects on exceptional groups are rare and prized; these three had not been computed before. One honest limit: all matches are at the prime 2, the only prime where an $F_4$ operator can be computed directly. The program's last open referee item is to check them at 5, and that check is running now (Front 8).
+
+\subsection{Front 4: the 24-dimensional grids and moonshine}
+There are exactly 24 even self-dual grids in 24 dimensions, the Niemeier lattices, including the Leech lattice. Using published neighbour counts (Chenevier--Lannes), we ran the law on them: it predicted exactly seven congruence primes, and exactly those seven appear. Two surprises followed. The weights in our formula turned out to be the \emph{umbral groups} of umbral moonshine, all 23 of them, so a table from a different corner of mathematics fell out of ours. And two of the seven special tunes are explicit polynomials in a single number, the Coxeter number, with each coincidence visible coefficient by coefficient. We also traced these ideas to the ``vertex operator algebras'' behind moonshine and to a reading in theoretical physics (averaged holography), recorded as an interpretation, not a result.
+
+\subsection{Front 5: $E_8$, and the Monster}
+$E_8$'s class set has never been listed and is far beyond reach (tens of thousands of 248-dimensional grids with almost no symmetry). The theorem nevertheless says exactly which primes carry congruences there: the numerators of five Bernoulli numbers, including the prime 1,001,259,881. A spectrum known for a module that has never been constructed. We also chased a thread toward the Monster group: the odd $F_4$ grid's symmetry group is a maximal subgroup of the Thompson group, itself a piece of the Monster. Using GAP's character tables we showed the thread is one of isomorphism type only, not of embedding, and we said so.
+
+\subsection{Front 6: the Riemann Hypothesis interlude}
+Asked to think about the Riemann Hypothesis, we did the responsible version: reproduced a known 67.25\% result on Odlyzko's zeros, measured what a ``third-moment'' refinement would be worth, and found the honest answer: about a third of a percentage point, contingent on a theorem that does not exist. The door was recorded as ``open a crack'' and closed. Later we laid out, at your request, the best-supported path from our data to RH, marking each link known, conjectural or missing; the missing link is RH itself in disguise, and no data can supply it.
+
+\subsection{Front 7: Landau--Siegel zeros and Galois orbits}
+A more promising neighbour of RH is the Landau--Siegel problem, guarded by a famous 50\% barrier (Iwaniec--Sarnak, 2000). We built the classical version of our instrument (class sets of quaternion algebras, which are supersingular elliptic curves), verified Gross's formula to seven digits, and counted \emph{exactly} how many central values vanish at 240 prime levels: 99.81\% do not, the exceptions being the rank-2 curves, starting with 389a as theory demands. We then proved three theorems (an integrality bound on Galois orbits, an averaging lemma now machine-certified, and a conditional theorem) showing that a Galois-orbit argument reaches \emph{exactly} the 50\% barrier from the algebraic side, and would pass it under one conjecture (Martin's) plus a growth condition. Measuring that growth on certified orbits up to level 811 leans \emph{against} the condition. The literature check found that Martin (2021) and Martin--Wiebe (2020) own the nonvanishing step and had flagged our size step as the missing piece. We then found the exact reason: the cost in the bound is a Faltings height, which grows with the level, so the hypothesis is false and the route reaches the barrier but cannot pass it. Net: a precise theorem, and a closed door with its reason written on it.
+
+\subsection{Front 8: the prime 5, from a check to a class set}
+An $F_4$ Hecke operator at 5 has 191 billion neighbours per grid; enumeration is impossible. The check of the predicted eigenvalue (336,244,104, exactly as predicted from the Ramanujan $\tau$ function) was completed on 3 October by an exact orbit count. The same machinery then determined the whole class set of $F_4$ at the level attached to 5: 259 grids (54 over the standard Albert lattice, 205 over the exotic one), with the masses meeting their predicted values exactly on both sides, an explicit representative for every grid, and three rare grids whose symmetry orders (336, 1536, 6048) were forced by an exact residual. One operator at that level was then computed exactly: the Iwahori--Hecke generator at 5, whose matrix sums to 5 on every row, obeys the mass symmetry on all 55,696 pairs, and satisfies the expected quadratic relation with zero violations; its spectrum is $5$ and $-1$ only. An attempt to estimate the operator at 2 by sampling was abandoned, honestly (Correction 22): the sampler reused the wrong neighbour construction, its lifting was biased, and no feasible amount of sampling could resolve the eigenvalues in any case. The eigenvalues predicted for the lifts at level 5 are recorded as predictions, untested.
+
+\subsection{Front 9: proof certification}
+Seven theorems now compile in Lean~4 against the Mathlib library on GitHub's servers, with no gaps and only the three standard axioms: the three-part core of the existence theorem, the averaging lemma, the idempotent step and both halves of the Deligne--Serre step. Every push re-checks them; the build log is public.
+
+\subsection{Front 10: the sedenions, and the structure of zero}
+Chris's intuition, recorded in the compass note as his: the octonions and the sedenions together are the key to the next discovery, and the sedenions are disregarded today the way zero, negative numbers, $\sqrt{-1}$, infinite cardinals and division by zero were once disregarded. We tested what can be tested. Doubling our integral octonions gives the integral sedenions (the lattice $E_8\oplus E_8$); among their elements with two unit halves there are exactly 7{,}560 zero divisors, characterised completely: both halves imaginary and perpendicular. Each has a four-dimensional space of partners, and the pairs that multiply to zero number $84{,}672 = 7\times12{,}096$, on which the symmetry group $G_2(2)$ of the octonions acts freely, in seven copies of itself. Over the real numbers Moreno proved in 1998 that this pair set is the Lie group $G_2$. So the sedenions' failure is not noise: the algebra remembers its deepest symmetry exactly where it breaks. The program's working hypothesis is to study this zero-divisor geometry as the object, the way Riemann studied poles, with the honest test attached: a disregarded idea becomes fundamental only when an outside problem needs it, and that problem has not yet been found.
+
+\subsection{Front 10, continued: what the zero divisors turned out to be}
+The zero-divisor geometry gave one theorem and several closures. The theorem: the zero divisors of each type meet the $G_2$ class set at a prime $p$ in orbits of the cube's rotation group, with a formula for which orbits appear depending only on $p$ modulo 24, proved for every $p\ge5$ by a structural reduction to a finite computation (and genuinely failing at $p=3$). The closures: the ``periods'' along these conics turned out to be a definition in disguise where they vanished, and generic where they did not, with a clean selection rule (verified in a 97-dimensional computation) for which weights can see the zero divisors at all; the real symmetry of the sedenions that mixes the two halves is not integral; the zero divisors are exactly the pairs of perpendicular roots of the $E_7$ lattice, so their count obeys a classical mass formula; and the Okubo algebra's integral form, raised in a 2026 paper, has exactly one integral product on our lattice, answering that paper's open question in passing. The deeper hope, that the zero divisors would open a route to gravity, found no mechanism in any of the spectral geometries we tried; the honest statement is that the octonions carry the physics structure and the sedenions carry the generation structure, with no bridge found.
+
+\section{The papers}
+\begin{itemize}[nosep]
+\item \textbf{Part I}, \emph{Class sets and Eisenstein congruences on compact exceptional groups} (14 pp., draft 2 with the carriers theorem): the theorem and its tests on $G_2$, $F_4$, $E_8$ and the Niemeier lattices, with the Monster thread as an appendix.
+\item \textbf{Part II}, \emph{The Hecke module of the compact $F_4$ at level 3} (13 pp.): the fifteen identifications and the three new stable objects.
+\item \textbf{Part III}, \emph{The compact $F_4$ at level 5} (3 pp.): the class set of 259 grids with exact masses, the pair lemma, the exact operator at 5, and the predictions at 2.
+\item \textbf{Part IV}, \emph{Zero divisors of the integral sedenions and the compact $G_2$} (9 pp.): the zero-divisor geometry, the conic law, the selection rule, the lifts theorem.
+\item \textbf{Galois orbits, integrality and small central values} (4 pp.): the Landau--Siegel theorems.
+\end{itemize}
+Parts I and II passed a referee-style review; every review item is closed. They are working drafts and, by decision, the program's own record: nothing is being sent to anyone.
+
+\section{Where it could lead}
+\subsection{Near term (weeks)}
+\begin{itemize}[nosep]
+\item The prime-5 verification completes; agreement closes the last review item, disagreement is a discovery.
+\item The genus-2 object becomes a theorem: Arthur's classification, via Ta\"ibi's work on compact forms, should turn our computation into a proof that a specific new Siegel modular form exists, the one $F_4$ predicted. This is the most likely genuinely new theorem within reach.
+
+\end{itemize}
+\subsection{Medium term (months)}
+\begin{itemize}[nosep]
+\item An exact operator at 5 needs a new tool (stabilisers of objects among 38 billion); building it would replace the statistical check with an exact one and open other primes.
+\item The three stable objects should have Galois representations with full symmetry; if proved, they give new cases of the inverse Galois problem for $G_2$ and of the Bloch--Kato conjecture, the deepest conjecture linking special values to arithmetic.
+\item The organising principle we found, that every congruence is either a transported classical one or level-raising at the level prime, could be proved in general; that would be a classification of where congruences on compact groups come from.
+\item The zero-divisor geometry of the sedenions and the algebras beyond them: what indexes the seven orbits, whether the 32-dimensional algebra carries a finite group the same way, and whether anything outside the subject needs the answer.
+\end{itemize}
+\subsection{Far term, and what to expect}
+The program does \emph{not} have a path to the Riemann Hypothesis and says so. It has a precise, conditional path toward the Landau--Siegel problem, whose hypothesis our own data disfavour. What it has achieved is a complete, verifiable description of a small piece of the automorphic world on exceptional groups, with three new objects in it, a formalised proof, and an instrument that can be pointed at the next level or the next group. If the medium-term items land, the program will have produced new theorems in the Langlands program, which is where exceptional groups matter most today.
+
+\section{How we worked, and the record of errors}
+Every number was checked against an independent route (a second Hecke operator, a second group, a second prime, a mass formula, or a published table). Twenty corrections are logged, from an arithmetic slip caught by a dictionary to a priority correction that rewrote the paper, and this month a ``certification'' shortcut that was wrong and was withdrawn after validation. The full state is stored three ways: the Dropbox folder (papers, notes, code, data archives), GitHub (the Lean project with its public build history and the sampling workflow), and the four data archives you uploaded (about 700~MB), each verified by checksum.
+
+\section*{Glossary}
+\begin{description}[nosep,leftmargin=1.6cm]
+\item[Octonions] the eight-dimensional number system at the top of the staircase real--complex--quaternion--octonion.
+\item[Exceptional group] one of five symmetry groups ($G_2,F_4,E_6,E_7,E_8$) built from the octonions.
+\item[Lattice / grid] a regular array of points in many dimensions; the objects we count.
+\item[Class set] the finite list of essentially different grids for a group and level.
+\item[Hecke operator] a table of neighbour counts between grids; its eigenvalues are the ``tunes''.
+\item[Congruence] agreement of two tunes modulo a prime; the trace of hidden structure.
+\item[Mass] a weighted count of the class set, computed from Bernoulli numbers; its prime factors are the congruence primes.
+\item[Lift] a tune on a big group built from a tune on a smaller one; \textbf{stable} means not a lift in any expected way.
+\item[Lean] a proof assistant; a theorem that compiles in it has been checked by a computer line by line.
+\end{description}
+\end{document}

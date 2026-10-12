@@ -1,0 +1,32 @@
+name: Report level-19 analysis to an issue
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        default: "38021054653"
+      p:
+        default: "19"
+permissions:
+  contents: read
+  issues: write
+  actions: read
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy cypari2
+      - name: fetch and analyse
+        working-directory: g2table
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download ${{ github.event.inputs.run_id }} -D art || true
+          find art -type f | head; cp art/*/g2_iwahori_*.pkl . 2>/dev/null || cp art/g2_iwahori_*.pkl . 2>/dev/null || true
+          ls -la g2_iwahori_*.pkl
+          (timeout 6000 python3 analyze19.py ${{ github.event.inputs.p }} > report.txt 2>&1 || true)
+          tail -c 60000 report.txt > body.txt
+          gh issue create --title "Level ${{ github.event.inputs.p }} analysis (run ${{ github.event.inputs.run_id }})" --body-file body.txt

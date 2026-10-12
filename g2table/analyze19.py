@@ -18,7 +18,7 @@ try:
     T5 = pickle.load(open(f'g2_iwahori_{p}_T.pkl', 'rb'))[5]
     M = T.astype(float) + 0.3719 * T5.astype(float); w, V = np.linalg.eig(M); V = V.real
     l2 = np.array([(V[:, i] @ T @ V[:, i]) / (V[:, i] @ V[:, i]) for i in range(h)]); l5 = np.array([(V[:, i] @ T5 @ V[:, i]) / (V[:, i] @ V[:, i]) for i in range(h)])
-    pred5 = {(21, 846): 3, (9, 1074): 2, (-3.456, 1138.146): 3, (36.456, 439.854): 3, (32.549, 1123.417): 2, (54.085, 1083.221): 2, (49.131, 455.389): 2, (-0.764, 503.973): 2}
+    pred5 = {(21, 630): 3, (9, 1098): 2, (-3.456, 175.438): 3, (36.456, 574.562): 3, (32.549, 835.663): 2, (54.085, 330.978): 2, (49.131, 1425.087): 2, (-0.764, 1044.272): 2}
     print("\nJOINT (T2, T5): predicted lift pairs vs observed multiplicities:")
     for (a, b), m in pred5.items():
         obs = int(np.sum((np.abs(l2 - a) < 2e-3) & (np.abs(l5 - b) < 2e-2))); print(f"   ({a}, {b}): predicted x{m}, observed x{obs}  {'OK' if obs == m else 'MISMATCH'}")

@@ -13,15 +13,20 @@ for v, (m, name) in sorted(pred.items(), reverse=True):
     obs = sum(c for w, c in mult.items() if abs(w - v) < 2e-3); flag = 'OK' if obs == m else 'MISMATCH'; ok &= obs == m
     print(f"   {v:>8}: predicted x{m}, observed x{obs}  {flag}   {name}")
 print("all lift predictions correct:", ok)
-# tempered bound at 2 and the Eisenstein congruences via the characteristic polynomial (exact integer arithmetic)
-print("eigenvalues violating |T2+1| <= 56 (excluding 126):", [round(float(w), 3) for w in ev if abs(w + 1) > 56 + 1e-6 and abs(w - 126) > 1e-6])
-pari = cypari2.Pari(); pari.allocatemem(4*10**9)
-M = pari.matrix(h, h, [int(x) for x in T.flatten()]); cp = pari.charpoly(M); fac = pari.factor(cp)
-print(f"charpoly factored: {int(pari.matsize(fac)[0])} irreducible factors; degrees {sorted(collections.Counter(int(pari.poldegree(fac[i,0])) for i in range(int(pari.matsize(fac)[0]))).items())}")
-for ell in (5, 7, 127):
-    carriers = []
-    for i in range(int(pari.matsize(fac)[0])):
-        f = fac[i, 0]; mlt = int(fac[i, 1])
-        if int(pari.poldegree(f)) == 1 and int(-pari.polcoef(f, 0)) == 126: continue
-        if int(pari.subst(f, pari.variable(f), 126)) % ell == 0: carriers.append((str(f)[:60], mlt))
-    print(f"mod {ell}: factors of the characteristic polynomial congruent to the Eisenstein value 126 (degree-level test): {carriers}")
+# joint eigen-systems (T2, T5) when T5 is available; predicted lift pairs
+try:
+    T5 = pickle.load(open(f'g2_iwahori_{p}_T.pkl', 'rb'))[5]
+    M = T.astype(float) + 0.3719 * T5.astype(float); w, V = np.linalg.eig(M); V = V.real
+    l2 = np.array([(V[:, i] @ T @ V[:, i]) / (V[:, i] @ V[:, i]) for i in range(h)]); l5 = np.array([(V[:, i] @ T5 @ V[:, i]) / (V[:, i] @ V[:, i]) for i in range(h)])
+    pred5 = {(21, 846): 3, (9, 1074): 2, (-3.456, 1138.146): 3, (36.456, 439.854): 3, (32.549, 1123.417): 2, (54.085, 1083.221): 2, (49.131, 455.389): 2, (-0.764, 503.973): 2}
+    print("\nJOINT (T2, T5): predicted lift pairs vs observed multiplicities:")
+    for (a, b), m in pred5.items():
+        obs = int(np.sum((np.abs(l2 - a) < 2e-3) & (np.abs(l5 - b) < 2e-2))); print(f"   ({a}, {b}): predicted x{m}, observed x{obs}  {'OK' if obs == m else 'MISMATCH'}")
+    print("T5 row sums:", sorted(set(T5.sum(1).tolist())), "| tempered-bound violations at 5 (|T5+1| > 875):", int(np.sum(np.abs(l5 + 1) > 875 + 1e-6)) - 1)
+    # Eisenstein component mod ell: h - rank over F_ell of [T2 - 126 ; T5 - 19530]
+    pari = cypari2.Pari(); pari.allocatemem(6 * 10**9)
+    for ell in (5, 7, 127):
+        A = np.vstack([(T - 126 * np.eye(h, dtype=np.int64)) % ell, (T5 - 19530 * np.eye(h, dtype=np.int64)) % ell])
+        Mp = pari.matrix(2 * h, h, [int(x) for x in A.flatten()]); rk = int(pari.matrank(Mp * pari.Mod(1, ell)))
+        print(f"   mod {ell}: dimension of the Eisenstein eigenspace (joint kernel of T2-126, T5-19530 over F_{ell}) = {h - rk}")
+except KeyError: print("(no T5 in this run)")

@@ -25,10 +25,10 @@ try:
     for (a, b), m in pred5.items():
         obs = int(np.sum((np.abs(l2 - a) < 2e-3) & (np.abs(l5 - b) < 2e-2))); print(f"   ({a}, {b}): predicted x{m}, observed x{obs}  {'OK' if obs == m else 'MISMATCH'}")
     print("T5 row sums:", sorted(set(T5.sum(1).tolist())), "| tempered-bound violations at 5 (|T5+1| > 875):", int(np.sum(np.abs(l5 + 1) > 875 + 1e-6)) - 1)
-    # Eisenstein component mod ell: h - rank over F_ell of [T2 - 126 ; T5 - 19530]
-    pari = cypari2.Pari(); pari.allocatemem(6 * 10**9)
-    for ell in (5, 7, 127):
-        A = np.vstack([(T - 126 * np.eye(h, dtype=np.int64)) % ell, (T5 - 19530 * np.eye(h, dtype=np.int64)) % ell])
-        Mp = pari.matrix(2 * h, h, [int(x) for x in A.flatten()]); rk = int(pari.matrank(Mp * pari.Mod(1, ell)))
-        print(f"   mod {ell}: dimension of the Eisenstein eigenspace (joint kernel of T2-126, T5-19530 over F_{ell}) = {h - rk}")
+    # Eisenstein component mod ell: h - rank over F_ell of [T2 - 126 ; T5 - 19530]  (numpy elimination)
+    from modrank import rank_mod
+    for ell in (127, 7, 5):
+        A = np.vstack([(T - 126 * np.eye(h, dtype=np.int64)), (T5 - 19530 * np.eye(h, dtype=np.int64))])
+        rk = rank_mod(A, ell); print(f"   mod {ell}: dimension of the joint Eisenstein eigenspace (ker of T2-126 and T5-19530 over F_{ell}) = {h - rk}", flush=True)
+    print("   predictions: mod 127 -> 1 + 8 (quartic lifts) = 9 (+ ~1/127^2 chance per other form); mod 7 -> 1 + 3 + 6 (lifts 1 and 3) = 10 plus ~h/49 ≈ 90 chance coincidences (two operators cannot isolate it); mod 5 -> 1 + 3 (lift 1) plus ~h/25 ≈ 177 chance")
 except KeyError: print("(no T5 in this run)")

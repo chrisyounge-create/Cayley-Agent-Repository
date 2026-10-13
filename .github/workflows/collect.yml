@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   actions: read
+  issues: write
 jobs:
   collect:
     runs-on: ubuntu-latest
@@ -25,8 +26,14 @@ jobs:
           done
           find results -type f | tail -20; du -sh results
       - name: commit to the results branch
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "collector"; git config user.email "collector@users.noreply.github.com"
           git checkout -B results
           git add -A results && (git commit -m "Collected artifacts ${{ github.event.inputs.run_ids }}" || echo "nothing to commit")
-          git push -f origin results
+          if ! git push -f origin results > push.log 2>&1; then
+            { echo "collector push failed:"; echo '```'; cat push.log; echo '```'; git status | head -20; git log --oneline -3; du -sh results; } > err.txt
+            gh issue create --title "collector failure (run ${{ github.run_id }})" --body-file err.txt
+            exit 1
+          fi

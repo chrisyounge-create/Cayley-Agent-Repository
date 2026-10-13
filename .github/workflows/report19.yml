@@ -24,9 +24,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh run download ${{ github.event.inputs.run_id }} -D art || true
-          find art -type f | head; cp art/*/g2_iwahori_*.pkl . 2>/dev/null || cp art/g2_iwahori_*.pkl . 2>/dev/null || true
-          ls -la g2_iwahori_*.pkl
+          gh run download ${{ github.event.inputs.run_id }} -D art 2>&1 | tail -3 || true
+          { echo "download listing:"; find art -type f -exec ls -la {} \; ; } > listing.txt 2>&1
+          for f in $(find art -name 'g2_iwahori_*.pkl*'); do case "$f" in *.gz) gunzip -c "$f" > "$(basename "${f%.gz}")";; *) cp "$f" .;; esac; done
+          ls -la g2_iwahori_*.pkl >> listing.txt 2>&1 || true
           (timeout 6000 python3 analyze19.py ${{ github.event.inputs.p }} > report.txt 2>&1 || true)
-          tail -c 60000 report.txt > body.txt
+          { cat listing.txt; echo; tail -c 55000 report.txt; } > body.txt
           gh issue create --title "Level ${{ github.event.inputs.p }} analysis (run ${{ github.event.inputs.run_id }})" --body-file body.txt

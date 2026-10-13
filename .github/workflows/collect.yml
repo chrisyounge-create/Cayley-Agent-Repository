@@ -1,6 +1,10 @@
 name: Collect Part III artifacts into the repository
 on:
   workflow_dispatch:
+    inputs:
+      run_ids:
+        description: space-separated run ids
+        default: "38021054653"
 permissions:
   contents: write
   actions: read
@@ -9,19 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: download artifacts of the Part III runs
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p results
-          for RID in 38021054653; do
+          for RID in ${{ github.event.inputs.run_ids }}; do
             gh run download $RID -D results/$RID || echo "run $RID: nothing downloaded"
           done
-          find results -type f | head -50
-          du -sh results
-      - name: commit
+          find results -type f | tail -20; du -sh results
+      - name: commit to the results branch
         run: |
           git config user.name "collector"; git config user.email "collector@users.noreply.github.com"
-          git add -A results; git commit -m "Collected artifacts" || echo "nothing to commit"
-          git pull --rebase origin main || true
-          git push origin HEAD:main || git push -f origin HEAD:results-latest
+          git checkout -B results
+          git add -A results && (git commit -m "Collected artifacts ${{ github.event.inputs.run_ids }}" || echo "nothing to commit")
+          git push -f origin results

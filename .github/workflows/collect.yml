@@ -24,6 +24,7 @@ jobs:
           for RID in ${{ github.event.inputs.run_ids }}; do
             gh run download $RID -D results/$RID || echo "run $RID: nothing downloaded"
           done
+          find results -type f -size +90M -exec gzip -9 {} \;
           find results -type f | tail -20; du -sh results
       - name: commit to the results branch
         env:

@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install numpy
+      - run: pip install numpy scipy
       - name: compute
         working-directory: g2table
         run: timeout 20500 python3 g2_iwahori.py ${{ github.event.inputs.p }} ${{ github.event.inputs.q }} 2>&1 | tee g2_iwahori_${{ github.event.inputs.p }}.log

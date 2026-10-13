@@ -154,4 +154,4 @@ for q in qs:
     ev = np.sort(np.linalg.eigvals(T.astype(float)).real)[::-1]
     print(f"T_{q}: row sums {rs}; mass-symmetry defect {sym:.1e}; top eigenvalues {np.round(ev[:6], 3).tolist()} [{time.time()-t0:.0f}s]", flush=True)
     results[q] = T
-pickle.dump({'p': p, 'classes': [(r, m.tolist(), len(stabs[r]) // o) for r, m, s, o in classes], 'line_reps': line_reps.tolist()}, open(f'g2_iwahori_{p}.pkl', 'wb')); pickle.dump(results, open(f'g2_iwahori_{p}_T.pkl', 'wb'))
+pickle.dump({'p': p, 'classes': [(r, m.tolist(), len(stabs[r]) // o) for r, m, s, o in classes], 'line_reps': line_reps.tolist()}, open(f'g2_iwahori_{p}.pkl', 'wb')); import scipy.sparse as sp; pickle.dump({q: sp.csr_matrix(T) for q, T in results.items()}, open(f'g2_iwahori_{p}_T.pkl', 'wb'))

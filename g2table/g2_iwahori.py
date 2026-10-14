@@ -4,6 +4,7 @@ import numpy as np, sys, time, itertools, collections, pickle
 from exc_alg import E8, STRUCT
 from coxeter_aut import ONE
 p = int(sys.argv[1]); qs = [int(x) for x in sys.argv[2].split(',')] if len(sys.argv) > 2 else [2]
+slice_j, slice_n = (int(sys.argv[3]), int(sys.argv[4])) if len(sys.argv) > 4 else (0, 1)        # optional row slice for the Hecke operators
 t0 = time.time(); G = np.load('gamma_G2Z.npy').astype(np.int64); one = np.array(ONE, dtype=np.int64); E = np.array(E8, dtype=np.int64)
 w = E @ one                                                   # trace functional: tr(x) = x.w ... (tr = (x E one)/? ) use x.w == 0 mod p as trace-zero
 PW = [p**k for k in range(8)]
@@ -145,13 +146,16 @@ for q in qs:
     maps = np.load(f'nbr_maps{q}.npy'); gq = np.rint(maps * q).astype(np.int64); qinv = pow(q, -1, p)
     h = len(classes); T = np.zeros((h, h), dtype=np.int64)
     for ci, (r, m, s_, o) in enumerate(classes):
+        if ci % slice_n != slice_j: continue
         l = L[r]
         for g in gq:
             Tm = inv_mod((g * qinv) % p, p)                        # the neighbour map acts through its inverse mod p (validated convention)
             T[ci, class_of_flag((l @ Tm) % p, (m @ Tm) % p)] += 1
-    rs = sorted(set(T.sum(1).tolist())); st_ = np.array([s_ for r, m, s_, o in classes], dtype=float)
-    sym = np.max(np.abs(T / st_[:, None] - (T / st_[:, None]).T))
-    ev = np.sort(np.linalg.eigvals(T.astype(float)).real)[::-1]
-    print(f"T_{q}: row sums {rs}; mass-symmetry defect {sym:.1e}; top eigenvalues {np.round(ev[:6], 3).tolist()} [{time.time()-t0:.0f}s]", flush=True)
-    results[q] = T
-pickle.dump({'p': p, 'classes': [(r, m.tolist(), len(stabs[r]) // o) for r, m, s, o in classes], 'line_reps': line_reps.tolist()}, open(f'g2_iwahori_{p}.pkl', 'wb')); import scipy.sparse as sp; pickle.dump({q: sp.csr_matrix(T) for q, T in results.items()}, open(f'g2_iwahori_{p}_T.pkl', 'wb'))
+    import scipy.sparse as sp
+    results[q] = sp.csr_matrix(T); pickle.dump(results[q], open(f'g2_iwahori_{p}_T{q}_slice{slice_j}of{slice_n}.pkl', 'wb'))
+    if slice_n == 1:
+        rs = sorted(set(T.sum(1).tolist())); st_ = np.array([s_ for r, m, s_, o in classes], dtype=float)
+        sym = np.max(np.abs(T / st_[:, None] - (T / st_[:, None]).T)); ev = np.sort(np.linalg.eigvals(T.astype(float)).real)[::-1]
+        print(f"T_{q}: row sums {rs}; mass-symmetry defect {sym:.1e}; top eigenvalues {np.round(ev[:6], 3).tolist()} [{time.time()-t0:.0f}s]", flush=True)
+    else: print(f"T_{q}: slice {slice_j} of {slice_n} done [{time.time()-t0:.0f}s]", flush=True)
+if slice_n == 1: pickle.dump({'p': p, 'classes': [(r, m.tolist(), len(stabs[r]) // o) for r, m, s, o in classes], 'line_reps': line_reps.tolist()}, open(f'g2_iwahori_{p}.pkl', 'wb')); pickle.dump(results, open(f'g2_iwahori_{p}_T.pkl', 'wb'))

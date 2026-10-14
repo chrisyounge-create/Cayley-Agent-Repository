@@ -1,0 +1,6 @@
+p = 19: 2613660 null lines [13s]
+line orbits (under 8 random generators): 238 [48s]
+line-level class set verified: 238 classes, stabilisers [(1, 204), (2, 17), (3, 6), (4, 1), (6, 7), (16, 1), (18, 1), (24, 1)] [49s]
+Iwahori classes: 4437 [2073s]
+mass 155575/36 vs predicted (p^6-1)(p+1)/((p-1)*12096) = 155575/36: EXACT
+T_2: row sums [126]; mass-symmetry defect 0.0e+00; top eigenvalues [126.0, 54.085, 54.085, 50.397, 49.131, 49.131] [2949s]

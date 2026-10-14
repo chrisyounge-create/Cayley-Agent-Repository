@@ -1,0 +1,31 @@
+name: G2 Iwahori Hecke operator T_q at level p, sliced
+on:
+  workflow_dispatch:
+    inputs:
+      p:
+        default: "19"
+      q:
+        default: "5"
+      n:
+        default: "8"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        j: [0,1,2,3,4,5,6,7]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy scipy
+      - name: compute
+        working-directory: g2table
+        run: timeout 20500 python3 g2_iwahori.py ${{ github.event.inputs.p }} ${{ github.event.inputs.q }} ${{ matrix.j }} ${{ github.event.inputs.n }} 2>&1 | tail -5
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g2slice-${{ github.event.inputs.p }}-q${{ github.event.inputs.q }}-${{ matrix.j }}
+          path: g2table/g2_iwahori_*slice*.pkl

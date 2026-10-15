@@ -24,7 +24,7 @@ try:
     print("\nJOINT (T2, T5): predicted lift pairs vs observed multiplicities:")
     for (a, b), m in pred5.items():
         obs = int(np.sum((np.abs(l2 - a) < 2e-3) & (np.abs(l5 - b) < 2e-2))); print(f"   ({a}, {b}): predicted x{m}, observed x{obs}  {'OK' if obs == m else 'MISMATCH'}")
-    print("T5 row sums:", sorted(set(T5.sum(1).tolist())), "| tempered-bound violations at 5 (|T5+1| > 875):", int(np.sum(np.abs(l5 + 1) > 875 + 1e-6)) - 1)
+    print("T5 row sums:", sorted(set(T5.sum(1).tolist())), "| tempered-bound violations at 5 (|T5+1| > 875; Eisenstein 19530):", int(np.sum(np.abs(l5 + 1) > 875 + 1e-6)) - 1)
     # Eisenstein component mod ell: h - rank over F_ell of [T2 - 126 ; T5 - 19530]  (numpy elimination)
     from modrank import rank_mod
     for ell in (127, 7, 5):

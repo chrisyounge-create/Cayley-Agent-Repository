@@ -1,9 +1,12 @@
 import pickle, numpy as np, collections, sys, cypari2
 from fractions import Fraction as Fr
 p = int(sys.argv[1]) if len(sys.argv) > 1 else 19
-d = pickle.load(open(f'g2_iwahori_{p}.pkl', 'rb')); import scipy.sparse as sp
-_T = pickle.load(open(f'g2_iwahori_{p}_T.pkl', 'rb'))
-T = _T[2].toarray() if sp.issparse(_T[2]) else _T[2]
+d = pickle.load(open(f'g2_iwahori_{p}.pkl', 'rb')); import scipy.sparse as sp, os
+if os.path.exists(f'g2_iwahori_{p}_T.npz'):
+    _z = np.load(f'g2_iwahori_{p}_T.npz'); _T = {2: _z['T2'].astype(np.int64), 5: _z['T5'].astype(np.int64)}
+else:
+    _T = pickle.load(open(f'g2_iwahori_{p}_T.pkl', 'rb')); _T = {q: (M.toarray() if sp.issparse(M) else M) for q, M in _T.items()}
+T = _T[2]
 h = T.shape[0]; stabs = [c[2] for c in d['classes']]
 print(f"level {p}: h = {h}; mass {sum(Fr(1, s) for s in stabs)}; row sums {sorted(set(T.sum(1).tolist()))}")
 ev = np.sort(np.linalg.eigvals(T.astype(float)).real)[::-1]; mult = collections.Counter(np.round(ev, 3))
@@ -17,7 +20,7 @@ for v, (m, name) in sorted(pred.items(), reverse=True):
 print("all lift predictions correct:", ok)
 # joint eigen-systems (T2, T5) when T5 is available; predicted lift pairs
 try:
-    T5 = _T[5].toarray() if sp.issparse(_T[5]) else _T[5]
+    T5 = _T[5]
     M = T.astype(float) + 0.3719 * T5.astype(float); w, V = np.linalg.eig(M); V = V.real
     l2 = np.array([(V[:, i] @ T @ V[:, i]) / (V[:, i] @ V[:, i]) for i in range(h)]); l5 = np.array([(V[:, i] @ T5 @ V[:, i]) / (V[:, i] @ V[:, i]) for i in range(h)])
     pred5 = {(21, 630): 3, (9, 1098): 2, (-3.456, 175.438): 3, (36.456, 574.562): 3, (32.549, 835.663): 2, (54.085, 330.978): 2, (49.131, 1425.087): 2, (-0.764, 1044.272): 2}

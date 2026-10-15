@@ -1,0 +1,25 @@
+name: G2 Iwahori Hecke operator, single slice
+on:
+  workflow_dispatch:
+    inputs:
+      p: { default: "19" }
+      q: { default: "5" }
+      j: { default: "0" }
+      n: { default: "16" }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy scipy
+      - name: compute
+        working-directory: g2table
+        run: timeout 20500 python3 g2_iwahori.py ${{ github.event.inputs.p }} ${{ github.event.inputs.q }} ${{ github.event.inputs.j }} ${{ github.event.inputs.n }} 2>&1 | tail -3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g2slice1-${{ github.event.inputs.p }}-q${{ github.event.inputs.q }}-${{ github.event.inputs.j }}of${{ github.event.inputs.n }}
+          path: g2table/g2_iwahori_*slice*.pkl

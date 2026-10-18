@@ -35,3 +35,28 @@ try:
         rk = rank_mod(A, ell); print(f"   mod {ell}: dimension of the joint Eisenstein eigenspace (ker of T2-126 and T5-19530 over F_{ell}) = {h - rk}", flush=True)
     print("   predictions: mod 127 -> 1 + 8 (quartic lifts) = 9 (+ ~1/127^2 chance per other form); mod 7 -> 1 + 3 + 6 (lifts 1 and 3) = 10 plus ~h/49 ≈ 90 chance coincidences (two operators cannot isolate it); mod 5 -> 1 + 3 (lift 1) plus ~h/25 ≈ 177 chance")
 except KeyError: print("(no T5 in this run)")
+
+# ---- carriers by eigen-system: minimal polynomials of (T2, T5) eigenvalues and congruence to the Eisenstein values modulo ell
+try:
+    import cypari2; pari = cypari2.Pari(); pari.allocatemem(2 * 10**9)
+    E2, E5 = 126, 19530
+    seen = set(); carriers = {5: [], 7: [], 127: []}
+    for i in range(h):
+        a, b = l2[i], l5[i]; key = (round(float(a), 4), round(float(b), 4))
+        if key in seen: continue
+        seen.add(key)
+        if abs(a - E2) < 1e-6 and abs(b - E5) < 1e-3: continue
+        for d in (1, 2, 3, 4, 6, 8):
+            pol = pari.algdep(pari(repr(float(a))), d, 20)
+            if int(pari.poldegree(pol)) <= d and abs(complex(pari.subst(pol, 'x', pari(repr(float(a)))))) < 1e-6 * (1 + abs(a))**d:
+                break
+        mult = int(np.sum((np.abs(l2 - a) < 2e-3) & (np.abs(l5 - b) < 2e-2)))
+        # congruence test on the norm of (lambda2 - 126): N(lambda2 - 126) = pol(126) up to sign for monic pol
+        try: n2 = int(pari.subst(pol, 'x', E2)); 
+        except Exception: continue
+        for ell in (5, 7, 127):
+            if n2 % ell == 0:
+                carriers[ell].append((key, f"deg {int(pari.poldegree(pol))}", f"x{mult}"))
+    for ell in (5, 7, 127):
+        print(f"\neigen-systems with N(T2 - 126) ≡ 0 mod {ell} (degree of the T2 minimal polynomial, multiplicity): {carriers[ell][:25]}")
+except Exception as e: print("carrier identification failed:", str(e)[:200])

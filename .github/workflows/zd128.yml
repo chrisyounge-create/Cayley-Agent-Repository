@@ -1,0 +1,25 @@
+name: Zero divisors of the integral 128-ions (unit-half census)
+on:
+  workflow_dispatch:
+    inputs:
+      K: { default: "7" }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        j: [0,1,2,3,4,5,6,7,8,9,10,11]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy cypari2
+      - name: compute
+        run: timeout 20500 python3 zd_ladder.py ${{ github.event.inputs.K }} ${{ matrix.j }} 12 2>&1 | tail -3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zd${{ github.event.inputs.K }}-${{ matrix.j }}
+          path: zd_ladder_*.json

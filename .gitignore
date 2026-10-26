@@ -1,2 +1,4 @@
 *.pkl.unpacked
 g2table/g2_iwahori_*_T.pkl
+__pycache__/
+*.pyc
